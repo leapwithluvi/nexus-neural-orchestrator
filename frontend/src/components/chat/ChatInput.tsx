@@ -1,51 +1,91 @@
 "use client";
 
-import { Send, Shield } from "lucide-react";
+import { Send } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const ChatInput = () => {
-    return (
-        <div className="fixed bottom-0 left-0 right-0 p-6 pointer-events-none z-50">
-            <div className="max-w-3xl mx-auto flex flex-col gap-0 pointer-events-auto bg-background/80 backdrop-blur-xl border border-border shadow-[0_20px_50px_rgba(0,0,0,0.2)]">
-                {/* Meta Header */}
-                <div className="flex items-center gap-4 px-4 py-1.5 border-b border-border bg-muted/30">
-                     <div className="flex items-center gap-2">
-                        <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse"></div>
-                        <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Encrypted_Channel</span>
-                     </div>
-                     <div className="h-2 w-[1px] bg-border"></div>
-                     <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground/50 italic">Storage: Persistent</span>
-                     <div className="flex items-center gap-2 ml-auto">
-                        <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Gemma_4.0_Core</span>
-                     </div>
-                </div>
+export const ChatInput = ({ onSend }: { onSend: (message: string) => void }) => {
+  const [value, setValue] = useState("");
+  const [height, setHeight] = useState(48);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-                <div className="relative flex flex-col p-4 bg-background/50">
-                    <textarea 
-                        className="w-full h-12 md:h-20 bg-transparent border-none p-0 text-sm font-medium focus:outline-none transition-all resize-none placeholder:text-muted-foreground/30 placeholder:uppercase placeholder:font-black placeholder:tracking-[0.2em] placeholder:text-[9px]"
-                        placeholder="ENTER COMMAND TO EXECUTE..."
-                        rows={1}
-                    />
-                    
-                    <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center gap-4">
-                            <div className="flex flex-col">
-                                <span className="text-[7px] font-black uppercase tracking-widest text-muted-foreground mb-0.5">Session_Latency</span>
-                                <span className="text-[9px] font-mono font-bold">1.24ms</span>
-                            </div>
-                        </div>
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+      const newHeight = Math.min(textareaRef.current.scrollHeight, 160);
+      setHeight(newHeight);
+      textareaRef.current.style.height = `${newHeight}px`;
+    }
+  }, [value]);
 
-                        <Button className="h-8 px-6 bg-foreground text-background font-black uppercase text-[9px] tracking-widest hover:opacity-90 transition-all shadow-[3px_3px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[1px] active:shadow-none rounded-none">
-                            Execute <Send size={12} className="ml-2" />
-                        </Button>
-                    </div>
-                </div>
-            </div>
-            
-            <p className="max-w-3xl mx-auto mt-3 text-[7px] font-black uppercase tracking-[0.4em] text-center text-muted-foreground/30">
-                Nexus Systems Interface // Secure Environment v4.0.1
-            </p>
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (value.trim() && !isSubmitting) {
+      onSend(value.trim());
+      setValue("");
+      setHeight(48);
+    }
+  };
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(e);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="w-full">
+      <div className="relative mx-auto max-w-3xl px-4 pb-4">
+        <div
+          className={cn(
+            "flex items-end gap-2 bg-background border rounded-2xl transition-all duration-200",
+            "hover:border-border/50 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20"
+          )}
+        >
+          <div className="flex-1 relative min-w-0">
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={(e) => setValue(e.target.value)}
+              onKeyDown={handleKeyDown}
+              onFocus={(e) => e.currentTarget.style.height = `${height}px`}
+              placeholder="Message..."
+              className={cn(
+                "w-full bg-transparent border-none resize-none outline-none px-4 py-3",
+                "text-base leading-relaxed placeholder:text-muted-foreground/50",
+                "focus:ring-0 min-h-[48px] max-h-[160px]"
+              )}
+              style={{ height: `${height}px` }}
+              rows={1}
+              disabled={isSubmitting}
+              aria-label="Chat input"
+            />
+          </div>
+
+          <div className="flex items-center gap-1 pr-2 pb-2">
+            <Button
+              type="submit"
+              disabled={!value.trim() || isSubmitting}
+              className={cn(
+                "h-10 w-10 rounded-xl bg-primary text-primary-foreground",
+                "hover:bg-primary/90 active:scale-[0.98] transition-all",
+                "disabled:opacity-40 disabled:cursor-not-allowed"
+              )}
+              aria-label="Send message"
+            >
+              <Send size={18} className="rotate-45" />
+            </Button>
+          </div>
         </div>
-    );
+
+        <p className="mt-2 text-center text-xs text-muted-foreground/50 max-w-3xl mx-auto px-4">
+          Press <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Enter</kbd> to send, <kbd className="px-1.5 py-0.5 bg-muted rounded text-[10px] font-mono">Shift+Enter</kbd> for new line
+        </p>
+      </div>
+    </form>
+  );
 };

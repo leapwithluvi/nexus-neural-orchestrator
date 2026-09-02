@@ -1,14 +1,16 @@
 "use client";
 
 import * as React from "react";
-import { 
-  Search, 
-  Terminal, 
-  History, 
-  BookOpen, 
-  Shield, 
-  Cpu, 
-  Plus
+import {
+  Search,
+  MessageSquare,
+  Settings,
+  Plus,
+  LogOut,
+  ChevronLeft,
+  ChevronRight,
+  LayoutDashboard,
+  Info,
 } from "lucide-react";
 
 import { NavChats } from "@/components/nav-chats";
@@ -25,137 +27,200 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { useAppContext } from "@/context/AppContext";
+import { cn } from "@/lib/utils";
 
-import { sidebarData } from "@/data/sidebar";
 import { userProfile } from "@/data/profile";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const context = useAppContext();
   const user = context?.user;
   const chats = context?.chats ?? [];
+  const currentChatId = context?.currentChatId;
+  const { state, toggleSidebar } = useSidebar();
   const [search, setSearch] = React.useState("");
 
   const groupedChats = chats.reduce((acc, chat) => {
     const date = new Date(chat.updatedAt);
-    const yearMonth = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-    if (!acc[yearMonth]) {
-      acc[yearMonth] = [];
-    }
-    acc[yearMonth].push({ name: chat.name, url: "#" });
-    return acc;
-  }, {} as Record<string, { name: string; url: string }[]>);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
 
-  const sortedMonthKeys = Object.keys(groupedChats).sort((a, b) => b.localeCompare(a));
+    let label = "Older";
+    if (date.toDateString() === today.toDateString()) label = "Today";
+    else if (date.toDateString() === yesterday.toDateString()) label = "Yesterday";
+    else if (date > new Date(today.getFullYear(), today.getMonth(), 1)) label = "This Month";
+    else label = date.toLocaleDateString([], { month: "long", year: "numeric" });
+
+    if (!acc[label]) acc[label] = [];
+    acc[label].push({ name: chat.name, id: chat.id });
+    return acc;
+  }, {} as Record<string, { name: string; id: string }[]>);
 
   const searchResults = chats
     .filter((chat) => chat.name.toLowerCase().includes(search.toLowerCase()))
-    .map((chat) => ({ name: chat.name, url: `#` }));
+    .map((chat) => ({ name: chat.name, id: chat.id }));
+
+  const handleSelectChat = (id: string) => {
+    context?.setCurrentChat(id);
+  };
+
+  const handleNewChat = async () => {
+    const newChat = await context?.createChat("");
+    if (newChat) {
+      context?.setCurrentChat(newChat.id);
+    }
+  };
+
+  const handleDeleteChat = (id: string) => {
+    context?.deleteChat(id);
+  };
+
+  const handleRenameChat = (id: string, newName: string) => {
+    context?.setChats(prev => prev.map(chat =>
+      chat.id === id ? { ...chat, name: newName, updatedAt: new Date().toISOString() } : chat
+    ));
+  };
 
   return (
-    <Sidebar variant="inset" className="border-r border-border bg-background" {...props}>
-      <SidebarHeader className="border-b border-border py-6">
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="hover:bg-transparent">
-              <Link href="/">
-                <div className="flex aspect-square size-8 items-center justify-center bg-foreground text-background">
-                  <Terminal size={18} strokeWidth={3} />
-                </div>
-                <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate font-black tracking-tighter text-lg uppercase italic">Nexus AI</span>
-                  <span className="truncate text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Protocol v4.01</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+    <Sidebar variant="sidebar" className="border-r border-border bg-background" {...props}>
+      <SidebarHeader className="border-b border-border p-4">
+        <SidebarMenuButton asChild size="lg" className="hover:bg-transparent p-0 w-full justify-start">
+          <Link href="/" className="flex items-center gap-3 w-full">
+            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
+              <MessageSquare size={18} className="text-primary-foreground" />
+            </div>
+            <span className="font-semibold text-lg truncate">Nexus AI</span>
+          </Link>
+        </SidebarMenuButton>
       </SidebarHeader>
 
-      <SidebarContent className="gap-0 py-4">
+      <SidebarContent className="flex-1 overflow-y-auto p-3 gap-1">
         <SidebarGroup>
           <SidebarMenu>
-            {sidebarData.systemMenu.map((item) => (
-              <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild className="rounded-none hover:bg-muted font-bold text-xs uppercase tracking-widest px-4 py-6">
-                  <Link href={item.url}>
-                    <item.icon size={16} />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                size="default"
+                className="gap-3 rounded-xl px-3 py-2.5 font-medium"
+                onClick={handleNewChat}
+              >
+                <Plus className="w-5 h-5 text-muted-foreground" />
+                <span className="truncate">New Chat</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </SidebarGroup>
 
-        <SidebarGroup className="border-t border-border mt-4 pt-6">
+        <SidebarGroup className="pt-2">
+          <SidebarGroupLabel className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Navigation
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <div className="relative px-2">
-              <Search className="absolute left-4 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild size="default" className="gap-3 rounded-xl px-3 py-2.5 font-medium">
+                  <Link href="/overview">
+                    <LayoutDashboard className="w-5 h-5 text-muted-foreground" />
+                    <span className="truncate">Overview</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild size="default" className="gap-3 rounded-xl px-3 py-2.5 font-medium">
+                  <Link href="/about">
+                    <Info className="w-5 h-5 text-muted-foreground" />
+                    <span className="truncate">About</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup className="pt-2">
+          <SidebarGroupLabel className="px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            History
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/50" />
               <Input
                 type="text"
-                placeholder="Search session history..."
+                placeholder="Search chats..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 bg-muted/20 border-border/10 rounded-none text-[10px] font-medium tracking-wide focus-visible:ring-1 focus-visible:ring-foreground placeholder:opacity-50"
+                className="pl-9 bg-muted/50 border-border/50 rounded-xl text-sm focus-visible:ring-2 focus-visible:ring-primary/20"
               />
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
-        
-        <div className="px-2 pb-20">
-            {search ? (
-            <NavChats chats={searchResults} title="Search Results" />
-            ) : (
+
+        <div className="pt-2">
+          {search ? (
+            searchResults.length > 0 && (
+              <NavChats
+                chats={searchResults}
+                title="Search Results"
+                onSelectChat={handleSelectChat}
+                onDeleteChat={handleDeleteChat}
+                onRenameChat={handleRenameChat}
+              />
+            )
+          ) : (
             <>
-                <SidebarGroup className="pb-2">
-                    <SidebarGroupLabel className="text-[10px] uppercase font-black tracking-[0.3em] text-muted-foreground flex items-center gap-2">
-                        <History size={12} /> SESSION ARCHIVES
-                    </SidebarGroupLabel>
-                </SidebarGroup>
-                {sortedMonthKeys.map((month) => (
-                <NavChats 
-                    key={month} 
-                    chats={groupedChats[month]} 
-                    title={month} 
+              {Object.entries(groupedChats).map(([label, chatList]) => (
+                <NavChats
+                  key={label}
+                  chats={chatList}
+                  title={label}
+                  onSelectChat={handleSelectChat}
+                  onDeleteChat={handleDeleteChat}
+                  onRenameChat={handleRenameChat}
                 />
-                ))}
+              ))}
+              {chats.length === 0 && !search && (
+                <div className="px-3 py-8 text-center text-sm text-muted-foreground/60">
+                  No conversations yet
+                </div>
+              )}
             </>
-            )}
+          )}
         </div>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border p-4 bg-muted/10">
-        <div className="mb-4 px-2">
-            <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-black tracking-widest text-muted-foreground uppercase">System Capacity</span>
-                <span className="text-[10px] font-mono text-foreground opacity-50">84%</span>
-            </div>
-            <div className="h-1 w-full bg-border">
-                <div className="h-full bg-foreground w-[84%]" />
-            </div>
-        </div>
-
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild className="rounded-none hover:bg-muted border border-border bg-background mb-4">
-              <Link href={sidebarData.footerMenu.credits.url}>
-                <div className="flex aspect-square size-8 items-center justify-center bg-muted">
-                  <sidebarData.footerMenu.credits.icon size={16} className="text-foreground" />
-                </div>
-                <div className="grid flex-1 text-left leading-tight">
-                  <span className="truncate text-[10px] font-black uppercase tracking-widest">{sidebarData.footerMenu.credits.title}</span>
-                  <span className="truncate font-mono text-xs font-bold">{user?.credits ?? 0} {sidebarData.footerMenu.credits.unit}</span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
-        <SidebarGroup className="p-0">
-             <NavUser user={userProfile} />
+      <SidebarFooter className="border-t border-border p-3">
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild size="default" className="gap-3 rounded-xl px-3 py-2.5 font-medium justify-start">
+                <Link href="/settings">
+                  <Settings className="w-5 h-5 text-muted-foreground" />
+                  <span className="truncate">Settings</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                size="default"
+                className="gap-3 rounded-xl px-3 py-2.5 font-medium justify-start text-destructive hover:bg-destructive/10"
+              >
+                <button onClick={() => context?.signOut?.()}>
+                  <LogOut className="w-5 h-5" />
+                  <span className="truncate">Sign Out</span>
+                </button>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
         </SidebarGroup>
+
+        <div className="pt-3 border-t border-border">
+          <NavUser user={userProfile} />
+        </div>
       </SidebarFooter>
     </Sidebar>
   );

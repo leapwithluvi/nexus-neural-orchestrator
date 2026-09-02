@@ -1,29 +1,29 @@
-import { Plus, BookOpen, Shield, Cpu } from "lucide-react";
+import { Plus, BookOpen, Shield, Cpu, Settings, LogOut, User, MessageSquare } from "lucide-react";
 
 export const sidebarData = {
-    systemMenu: [
-        {
-            title: "New Session",
-            url: "/",
-            icon: Plus,
-        },
-        {
-            title: "Intelligence Overview",
-            url: "/overview",
-            icon: BookOpen,
-        },
-        {
-            title: "System Infrastructure",
-            url: "/about",
-            icon: Shield,
-        },
-    ],
-    footerMenu: {
-        credits: {
-            title: "Compute Credits",
-            url: "/credits",
-            icon: Cpu,
-            unit: "Unit"
-        }
-    }
+  systemMenu: [
+    {
+      title: "New Chat",
+      url: "/chat/new",
+      icon: Plus,
+    },
+    {
+      title: "Overview",
+      url: "/overview",
+      icon: BookOpen,
+    },
+    {
+      title: "Settings",
+      url: "/settings",
+      icon: Settings,
+    },
+  ],
+  footerMenu: {
+    credits: {
+      title: "Credits",
+      url: "/credits",
+      icon: Cpu,
+      unit: "Credits",
+    },
+  },
 };

@@ -1,56 +1,40 @@
-# compiled output
+# Dependencies
+node_modules/
+bun.lockb
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Environmental Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
 /dist
-/node_modules
 /build
+/out
 
 # Logs
 logs
 *.log
 npm-debug.log*
-pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-lerna-debug.log*
 
-# OS
+# OS Files
 .DS_Store
+Thumbs.db
 
-# Tests
-/coverage
-/.nyc_output
+# Drizzle SQLite/Local test DBs (If you ever use local file DB)
+*.sqlite
+*.db
+*.db-journal
 
-# IDEs and editors
-/.idea
-.project
-.classpath
-.c9/
-*.launch
-.settings/
-*.sublime-workspace
-
-# IDE - VSCode
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-
-# dotenv environment variable files
-.env
-.env.development.local
-.env.test.local
-.env.production.local
-.env.local
-
-# temp directory
-.temp
-.tmp
-
-# Runtime data
-pids
-*.pid
-*.seed
-*.pid.lock
-
-# Diagnostic reports (https://nodejs.org/api/report.html)
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+# IDEs and Editors
+.idea
+.vscode/
+*.swp
+*.swo
