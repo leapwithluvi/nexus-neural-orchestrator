@@ -24,9 +24,9 @@ const envSchema = z.object({
 
   // Groq AI
   GROQ_API_KEY: z.string().min(1, 'GROQ_API_KEY is required'),
-  GROQ_MODEL: z.string().default('llama-3.3-70b-versatile'),
-  GROQ_MAX_TOKENS: z.coerce.number().default(4096),
-  GROQ_TEMPERATURE: z.coerce.number().min(0).max(2).default(0.7),
+  GROQ_MODEL: z.string().default('openai/gpt-oss-120b'),
+  GROQ_MAX_TOKENS: z.coerce.number().default(2048),
+  GROQ_TEMPERATURE: z.coerce.number().min(0).max(2).default(1),
   GROQ_SYSTEM_PROMPT: z.string().default('You are a helpful, expert AI assistant. Write concisely and use Markdown formatting.'),
 
   // CORS (comma-separated origins, e.g. "http://localhost:3000,https://myapp.com")

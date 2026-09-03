@@ -20,6 +20,7 @@ interface Message {
   role: "user" | "assistant";
   content: string;
   timestamp: string;
+  telemetry?: any;
 }
 
 export default function ChatPage() {
@@ -93,12 +94,12 @@ function ChatPageContent() {
         <div
           ref={messagesContainerRef}
           className={cn(
-            "flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border/50 scrollbar-track-transparent p-4",
+            "flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border/50 scrollbar-track-transparent py-4",
             openMobile && "overflow-hidden"
           )}
         >
           {currentChatId && currentMessages.length > 0 ? (
-            <div className="flex flex-col gap-6 max-w-3xl mx-auto w-full">
+            <div className="flex flex-col gap-1 max-w-3xl mx-auto w-full">
               {Object.entries(groupedMessages).map(([date, msgs]) => (
                 <div key={date} className="flex flex-col gap-3">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground/60 px-4">
@@ -107,17 +108,18 @@ function ChatPageContent() {
                        date === new Date(Date.now() - 86400000).toDateString() ? "Yesterday" : date}
                     </span>
                   </div>
-                  {msgs.map(({ role, content, timestamp }) => (
+                  {msgs.map(({ id, role, content, timestamp, telemetry }, index) => (
                     <ChatMessage
-                      key={timestamp}
+                      key={id || `${timestamp}-${index}`}
                       role={role}
                       content={content}
                       timestamp={timestamp}
+                      telemetry={telemetry}
                     />
                   ))}
                 </div>
               ))}
-              <div ref={messagesEndRef} />
+              <div ref={messagesEndRef} className="h-4" />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full px-6 text-center">

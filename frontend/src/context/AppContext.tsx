@@ -2,12 +2,14 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
   timestamp: string;
+  telemetry?: any;
 }
 
 interface Chat {
@@ -137,6 +139,7 @@ interface AppContextType {
   setTheme: React.Dispatch<React.SetStateAction<string>>;
   fetchUser: () => Promise<void>;
   signOut: () => void;
+  isAuthLoading: boolean;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -144,6 +147,7 @@ const AppContext = createContext<AppContextType | null>(null);
 export const AppContextProvider = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
@@ -165,17 +169,104 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   }, [theme]);
 
   const fetchUser = async () => {
-    setUser(dummyUserData);
+    setIsAuthLoading(true);
+    try {
+      // Read authenticated user from the session cookie set by OAuth redirect
+      const res = await apiFetch("/api/v1/auth/me");
+      if (!res.ok) throw new Error("Not authenticated");
+      const data = await res.json();
+      setUser({
+        id: data.data.id,
+        name: data.data.displayName || data.data.username || "User",
+        email: data.data.email,
+        avatar: data.data.avatarUrl || "",
+        credits: data.data.credits ?? 0,
+      });
+    } catch {
+      // No active session — user is not logged in
+      setUser(null);
+    } finally {
+      setIsAuthLoading(false);
+      // Clean up URL if OAuth redirects left ?login=success or ?error=
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        if (url.searchParams.has("login") || url.searchParams.has("error")) {
+          url.searchParams.delete("login");
+          url.searchParams.delete("error");
+          window.history.replaceState({}, "", url.toString());
+        }
+      }
+    }
   };
 
   const fetchUserChats = async () => {
-    setChats(dummyChats);
-    if (dummyChats.length > 0) {
-      setSelectedChat(dummyChats[0]);
-      setCurrentChatId(dummyChats[0].id);
-      if (dummyChats[0].messages.length > 0) {
-        setMessages(prev => ({ ...prev, [dummyChats[0].id]: dummyChats[0].messages }));
+    try {
+      const response = await apiFetch("/api/v1/conversations");
+
+      if (!response.ok) throw new Error("Failed to fetch conversations");
+      
+      const realChats = await response.json();
+      
+      // Map API response to frontend Chat interface
+      const mappedChats: Chat[] = realChats.data.map((c: any) => ({
+        id: c.id,
+        userId: c.userId,
+        username: c.user?.name ?? "Unknown",
+        name: c.title || "New Chat",
+        messages: [],
+        updatedAt: c.updatedAt,
+        createdAt: c.createdAt
+      }));
+
+      setChats(mappedChats);
+      
+      let targetChatId = mappedChats.length > 0 ? mappedChats[0].id : null;
+      
+      if (typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        const urlChatId = params.get("c");
+        if (urlChatId && mappedChats.some(c => c.id === urlChatId)) {
+          targetChatId = urlChatId;
+        }
       }
+
+      if (targetChatId) {
+        const chat = mappedChats.find(c => c.id === targetChatId);
+        setSelectedChat(chat || null);
+        setCurrentChatId(targetChatId);
+        
+        // Ensure its historical messages are loaded immediately on mount
+        try {
+          const mRes = await apiFetch(`/api/v1/conversations/${targetChatId}`);
+          if (mRes.ok) {
+            const data = await mRes.json();
+            if (data.data && data.data.messages) {
+              const historicalMessages: Message[] = data.data.messages.map((m: any) => ({
+                id: m.id,
+                role: m.role,
+                content: m.content,
+                timestamp: m.createdAt,
+                telemetry: m.role === 'assistant' && (m.tokenCount || m.latency) ? {
+                  totalTokens: m.tokenCount || 0,
+                  promptTokens: 0,
+                  completionTokens: m.tokenCount || 0,
+                  totalTime: m.latency || 0,
+                  promptTime: 0,
+                  completionTime: m.latency || 0,
+                  speed: (m.latency && m.tokenCount) ? Math.round(m.tokenCount / m.latency) : 0,
+                  model: m.model || undefined
+                } : undefined
+              }));
+              setMessages(prev => ({ ...prev, [targetChatId]: historicalMessages }));
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch initial historical messages", e);
+        }
+      }
+    } catch (e) {
+      console.warn("[AppContext] Failed to fetch conversations, using empty state:", e);
+      setChats([]);
     }
   };
 
@@ -194,6 +285,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   }, []);
 
   const sendMessage = useCallback(async (chatId: string, content: string) => {
+    // 1. Add user message to state immediately
     const userMessage: Message = {
       id: generateId(),
       role: "user",
@@ -212,20 +304,12 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
         : chat
     ));
 
-    await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
-
-    const responses = [
-      "I understand. Let me help you with that.",
-      "That's a great question. Here's what I think...",
-      "I can assist with that. Here are the key points...",
-      "Let me break this down for you...",
-      "Based on what you've shared, here's my analysis...",
-    ];
-
+    // 2. Prepare an empty bubble for the incoming AI response stream
+    const assistantId = generateId();
     const assistantMessage: Message = {
-      id: generateId(),
+      id: assistantId,
       role: "assistant",
-      content: responses[Math.floor(Math.random() * responses.length)],
+      content: "",
       timestamp: new Date().toISOString(),
     };
 
@@ -234,18 +318,129 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       [chatId]: [...(prev[chatId] || []), assistantMessage],
     }));
 
-    setChats(prev => prev.map(chat =>
-      chat.id === chatId
-        ? { ...chat, messages: [...chat.messages, assistantMessage], updatedAt: new Date().toISOString() }
-        : chat
-    ));
+    // 3. Connect to actual backend via Server-Sent Events (SSE)
+    try {
+      const response = await apiFetch("/api/v1/chat/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ conversationId: chatId, content }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("AI Core Error Payload:", errorText);
+        throw new Error(`Failed to connect to AI Core: ${errorText}`);
+      }
+
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      if (!reader) return;
+
+      let aiContent = "";
+      let telemetryData: any = undefined;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        const chunkText = decoder.decode(value, { stream: true });
+        const lines = chunkText.split("\n\n").filter(Boolean);
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const parsed = JSON.parse(line.slice(6));
+            
+            if (parsed.type === "chunk") {
+              aiContent += parsed.content;
+              
+              // RE-RENDER CHAT BUBBLE DURING STREAMING PROCESS
+              setMessages(prev => {
+                const currentMsgs = prev[chatId] || [];
+                const updatedList = [...currentMsgs];
+                updatedList[updatedList.length - 1] = { 
+                  ...updatedList[updatedList.length - 1], 
+                  content: aiContent 
+                };
+                return { ...prev, [chatId]: updatedList };
+              });
+              
+            } else if (parsed.type === "telemetry") {
+              // ATTACH TELEMETRY STATISTICS DATA IF PROVIDED BY GROQ
+              telemetryData = parsed.data;
+              setMessages(prev => {
+                const currentMsgs = prev[chatId] || [];
+                const updatedList = [...currentMsgs];
+                updatedList[updatedList.length - 1] = { 
+                  ...updatedList[updatedList.length - 1], 
+                  telemetry: telemetryData 
+                };
+                return { ...prev, [chatId]: updatedList };
+              });
+            } else if (parsed.type === "done") {
+              // Update timestamp immediately
+              setChats(prev => prev.map(chat =>
+                chat.id === chatId ? { ...chat, updatedAt: new Date().toISOString() } : chat
+              ));
+              // Poll for the AI-generated title (backend generates it async after stream)
+              // Retry up to 4 times with 1.5s delay to wait for title generation
+              (async () => {
+                const DEFAULT_TITLES = ["New Chat", "New Conversation", ""];
+                for (let attempt = 0; attempt < 4; attempt++) {
+                  await new Promise(r => setTimeout(r, 1500));
+                  try {
+                    const titleRes = await apiFetch(`/api/v1/conversations/${chatId}`);
+                    if (titleRes.ok) {
+                      const titleData = await titleRes.json();
+                      const newTitle = titleData?.data?.title;
+                      if (newTitle && !DEFAULT_TITLES.includes(newTitle)) {
+                        setChats(prev => prev.map(chat =>
+                          chat.id === chatId ? { ...chat, name: newTitle } : chat
+                        ));
+                        break; // Got a real title, stop polling
+                      }
+                    }
+                  } catch {
+                    // Non-critical
+                  }
+                }
+              })();
+            }
+          }
+        }
+        
+        if (done) break;
+      }
+    } catch (error) {
+      console.error("[Stream Error]", error);
+      // Error state fallback
+      setMessages(prev => {
+        const msgs = prev[chatId] || [];
+        msgs[msgs.length - 1].content = "⚠️ *Failed to reach AI Core. Make sure the backend server is running and the auth token is valid.*";
+        return { ...prev, [chatId]: [...msgs] };
+      });
+    }
   }, []);
 
   const createChat = useCallback(async (initialMessage?: string): Promise<Chat> => {
+    // Call backend to create a real conversation and get a valid UUID
+    let newConversationId = "";
+    try {
+      const res = await apiFetch("/api/v1/conversations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title: initialMessage ? initialMessage.slice(0, 50) : "New Chat" })
+      });
+      if (!res.ok) throw new Error("Failed to create conversation in database");
+      const json = await res.json();
+      newConversationId = json.data.id;
+    } catch (e) {
+      console.error(e);
+      throw e; // Halt execution if we can't get a proper ID
+    }
+
     const newChat: Chat = {
-      id: generateId(),
-      userId: dummyUserData.id,
-      username: dummyUserData.name,
+      id: newConversationId,
+      userId: user?.id || "",
+      username: user?.name || "User",
       name: initialMessage ? initialMessage.slice(0, 50) : "New Chat",
       messages: [],
       updatedAt: new Date().toISOString(),
@@ -262,9 +457,10 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     }
 
     return newChat;
-  }, [sendMessage]);
+  }, [sendMessage, user]);
 
-  const deleteChat = useCallback((chatId: string) => {
+  const deleteChat = useCallback(async (chatId: string) => {
+    // Delete in frontend
     setChats(prev => prev.filter(chat => chat.id !== chatId));
     setMessages(prev => {
       const next = { ...prev };
@@ -275,24 +471,83 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       setCurrentChatId(null);
       setSelectedChat(null);
     }
+    
+    // Delete in database
+    try {
+      await apiFetch(`/api/v1/conversations/${chatId}`, { method: "DELETE" });
+    } catch (e) {
+      console.error("Failed to delete chat", e);
+    }
   }, [currentChatId]);
 
-  const setCurrentChat = useCallback((id: string | null) => {
+  const setCurrentChat = useCallback(async (id: string | null) => {
     setCurrentChatId(id);
+    
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (id) {
+        url.searchParams.set("c", id);
+      } else {
+        url.searchParams.delete("c");
+      }
+      window.history.replaceState({}, "", url.toString());
+    }
+
     if (id) {
       const chat = chats.find(c => c.id === id);
       setSelectedChat(chat || null);
+      
+      // Fetch history if not already loaded locally
+      if (!messages[id] || messages[id].length === 0) {
+        try {
+          const res = await apiFetch(`/api/v1/conversations/${id}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.data && data.data.messages) {
+              const historicalMessages: Message[] = data.data.messages.map((m: any) => ({
+                id: m.id,
+                role: m.role,
+                content: m.content,
+                timestamp: m.createdAt,
+                telemetry: m.role === 'assistant' && (m.tokenCount || m.latency) ? {
+                  totalTokens: m.tokenCount || 0,
+                  promptTokens: 0,
+                  completionTokens: m.tokenCount || 0,
+                  totalTime: m.latency || 0,
+                  promptTime: 0,
+                  completionTime: m.latency || 0,
+                  speed: (m.latency && m.tokenCount) ? Math.round(m.tokenCount / m.latency) : 0,
+                  model: m.model || undefined
+                } : undefined
+              }));
+              setMessages(prev => ({ ...prev, [id]: historicalMessages }));
+            }
+          }
+        } catch (e) {
+          console.error("Failed to fetch historical messages", e);
+        }
+      }
     } else {
       setSelectedChat(null);
     }
-  }, [chats]);
+  }, [chats, messages]);
 
-  const signOut = () => {
-    setUser(null);
-    setChats([]);
-    setSelectedChat(null);
-    setCurrentChatId(null);
-    setMessages({});
+  const signOut = async () => {
+    try {
+      // Tell the backend to clear the session cookie
+      await apiFetch("/api/v1/auth/logout", {
+        method: "POST",
+      });
+    } catch {
+      // Proceed with local cleanup even if logout endpoint fails
+    } finally {
+      setUser(null);
+      setChats([]);
+      setSelectedChat(null);
+      setCurrentChatId(null);
+      setMessages({});
+      router.push("/login");
+    }
   };
 
   const value = {
@@ -313,6 +568,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     setTheme,
     fetchUser,
     signOut,
+    isAuthLoading,
   };
 
   return (

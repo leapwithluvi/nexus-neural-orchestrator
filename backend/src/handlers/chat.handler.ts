@@ -54,22 +54,47 @@ export const chatHandler = {
       content: env.groq.systemPrompt
     })
 
-    // Request streaming completion from Groq
-    const aiStream = await chatService.generateStream(history)
+    // Request streaming completion from Groq (with automatic model fallback)
+    const { stream: aiStream, usedModel } = await chatService.generateStream(history)
 
     // Stream chunks to client via SSE
     // Collect full response, then save to DB once completed
     return streamSSE(c, async (stream) => {
       let fullResponse = ''
+      let telemetryData: any = null
 
       try {
         for await (const chunk of aiStream) {
-          const content = chunk.choices[0]?.delta?.content || ''
+          // Extract delta content from stream chunk
+          const content = chunk.choices?.[0]?.delta?.content || ''
           fullResponse += content
 
           if (content) {
             await stream.writeSSE({ data: JSON.stringify({ type: 'chunk', content }) })
           }
+
+          // Extract Groq SDK Speed Telemetry (usually available in the final chunk)
+          const groqStats = (chunk as any).x_groq?.usage
+          if (groqStats) {
+            telemetryData = {
+              promptTokens: groqStats.prompt_tokens || 0,
+              completionTokens: groqStats.completion_tokens || 0,
+              totalTokens: groqStats.total_tokens || 0,
+              promptTime: groqStats.prompt_time || 0,
+              completionTime: groqStats.completion_time || 0,
+              totalTime: groqStats.total_time || 0,
+              // Calculate Tokens per Second (T/s), fallback to 1 to prevent division by zero
+              speed: Math.round((groqStats.completion_tokens || 0) / (groqStats.completion_time || 1)), 
+              model: usedModel  // Reflects actual model used (may differ if fallback occurred)
+            }
+          }
+        }
+
+        // Dispatch telemetry data block to UI before closing the stream
+        if (telemetryData) {
+          await stream.writeSSE({ 
+            data: JSON.stringify({ type: 'telemetry', data: telemetryData }) 
+          })
         }
 
         await stream.writeSSE({ data: JSON.stringify({ type: 'done', conversationId }) })

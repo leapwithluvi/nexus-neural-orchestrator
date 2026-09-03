@@ -5,9 +5,10 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const ChatInput = ({ onSend }: { onSend: (message: string) => void }) => {
+export const ChatInput = ({ onSend }: { onSend: (message: string) => Promise<void> | void }) => {
   const [value, setValue] = useState("");
   const [height, setHeight] = useState(48);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -19,16 +20,19 @@ export const ChatInput = ({ onSend }: { onSend: (message: string) => void }) => 
     }
   }, [value]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (value.trim() && !isSubmitting) {
-      onSend(value.trim());
-      setValue("");
-      setHeight(48);
+      setIsSubmitting(true);
+      try {
+        await onSend(value.trim());
+        setValue("");
+        setHeight(48);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -42,8 +46,10 @@ export const ChatInput = ({ onSend }: { onSend: (message: string) => void }) => 
       <div className="relative mx-auto max-w-3xl px-4 pb-4">
         <div
           className={cn(
-            "flex items-end gap-2 bg-background border rounded-2xl transition-all duration-200",
-            "hover:border-border/50 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/20"
+            "flex items-end gap-2 rounded-2xl transition-all duration-200",
+            "bg-muted/60 dark:bg-muted/40 border border-transparent",
+            "shadow-sm hover:shadow-md",
+            "focus-within:bg-background focus-within:border-border/60 focus-within:shadow-md"
           )}
         >
           <div className="flex-1 relative min-w-0">

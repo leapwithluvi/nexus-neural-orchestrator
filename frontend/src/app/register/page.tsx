@@ -15,7 +15,7 @@ export default function RegisterPage() {
           <RegisterForm onSwitch={() => router.push("/login")} />
           
           <div className="mt-8 pt-8 border-t border-border flex justify-between items-center opacity-30">
-              <span className="text-[8px] font-black tracking-widest uppercase">NXS_NODE_DEPLOY</span>
+              <span className="text-[8px] font-black tracking-widest uppercase">NXS NODE DEPLOY</span>
               <span className="text-[8px] font-mono">v4.0.1</span>
           </div>
         </div>

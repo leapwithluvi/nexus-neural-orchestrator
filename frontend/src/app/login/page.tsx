@@ -16,7 +16,7 @@ export default function LoginPage() {
           <LoginForm onSwitch={() => router.push("/register")} />
           
           <div className="mt-8 pt-8 border-t border-border flex justify-between items-center opacity-30">
-              <span className="text-[8px] font-black tracking-widest uppercase">NXS_SECURE_AUTH</span>
+              <span className="text-[8px] font-black tracking-widest uppercase">NXS SECURE AUTH</span>
               <span className="text-[8px] font-mono">v4.0.1</span>
           </div>
         </div>
