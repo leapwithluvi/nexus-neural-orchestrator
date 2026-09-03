@@ -17,8 +17,7 @@ const app = new Hono()
 import { csrf } from 'hono/csrf'
 import { bodyLimit } from 'hono/body-limit'
 
-// Payload Size Limit (Prevents DoS attacks from giant payloads)
-// Limits the maximum request payload to 5MB
+// Payload Size Limit
 app.use(
   bodyLimit({
     maxSize: 5 * 1024 * 1024,
@@ -26,12 +25,16 @@ app.use(
   })
 )
 
-// CSRF Protection (Prevents Cross-Site Request Forgery)
+const allowedOrigins = Array.isArray(env.cors.origin)
+  ? env.cors.origin
+  : typeof env.cors.origin === 'string'
+    ? (env.cors.origin as string).split(',').map(o => o.trim())
+    : [];
+
 app.use(
   csrf({
     origin: (origin) => {
-      // Allow requests from the configured frontend URL or local development
-      return env.cors.origin.includes(origin) || origin.startsWith('http://localhost')
+      return !origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost')
     },
   })
 )
@@ -39,16 +42,20 @@ app.use(
 // Request logging
 app.use(logger())
 
-// Security headers (replaces helmet)
+// Security headers
 app.use(secureHeaders())
 
-// CORS
 app.use(
   cors({
-    origin: env.cors.origin,
+    origin: (origin) => {
+      if (allowedOrigins.includes(origin) || origin.startsWith('http://localhost')) {
+        return origin
+      }
+      return allowedOrigins[0] || 'http://localhost:3000'
+    },
     credentials: env.cors.credentials,
     allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowHeaders: ['Content-Type', 'Authorization'],
+    allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     exposeHeaders: ['Set-Cookie'],
   }),
 )
