@@ -65,7 +65,7 @@ export default function OverviewPage() {
                         <ul className="space-y-3 text-[10px] font-black uppercase tracking-widest">
                             <li><Link href="/" className="hover:underline">Execute_Chat</Link></li>
                             <li><Link href="/docs" className="hover:underline">Documentation</Link></li>
-                            <li><Link href="https://github.com/leapwithluvi/nexus-neural-orchestrator" className="hover:underline">Source_Code</Link></li>
+                            <li><Link href="https://github.com/leapwithluvi/nexus-neural-orchestrator" className="hover:underline">Source Code</Link></li>
                         </ul>
                     </div>
                     <div className="space-y-6">

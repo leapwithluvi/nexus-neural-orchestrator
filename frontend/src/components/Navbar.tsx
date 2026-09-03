@@ -7,10 +7,12 @@ import { Menu, X } from "lucide-react";
 import Logo from "./Logo";
 import { navLinks } from "@/data/navigation";
 import { AuthDialog } from "./auth/AuthDialog";
+import { useAppContext } from "@/context/AppContext";
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAppContext();
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -38,7 +40,7 @@ const Navbar = () => {
               key={link.name}
               href={link.href}
               className={`text-[10px] font-black uppercase tracking-[0.2em] transition-all ${
-                link.name === "Docs_Core" 
+                link.name === "Docs Core" 
                 ? "text-emerald-500 hover:text-emerald-400" 
                 : "hover:opacity-50"
               }`}
@@ -49,19 +51,21 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4 md:gap-8">
-          <AuthDialog>
-            <button
-              className="hidden md:block px-5 py-2 border border-border text-foreground text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all"
-            >
-              Authorized_Login
-            </button>
-          </AuthDialog>
+          {!user && (
+            <AuthDialog>
+              <button
+                className="hidden md:block px-5 py-2 border border-border text-foreground text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all"
+              >
+                Authorized Login
+              </button>
+            </AuthDialog>
+          )}
 
           <Link
-            href="/"
+            href={user ? "/" : "/login"}
             className="hidden md:block px-5 py-2 bg-foreground text-background text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none"
           >
-            Execute_Terminal
+            {user ? "Execute Terminal" : "Start For Free"}
           </Link>
           <ModeToggle />
 
@@ -85,27 +89,29 @@ const Navbar = () => {
                 href={link.href}
                 onClick={() => setIsOpen(false)}
                 className={`text-2xl font-black uppercase tracking-widest transition-all ${
-                  link.name === "Docs_Core" ? "text-emerald-500" : "hover:italic"
+                  link.name === "Docs Core" ? "text-emerald-500" : "hover:italic"
                 }`}
               >
                 {link.name}
               </Link>
             ))}
             <div className="pt-8 border-t border-border space-y-4">
-              <AuthDialog>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="w-full text-xs font-black uppercase tracking-[0.4em] border border-border p-4 block text-center"
-                >
-                  Authorized Login
-                </button>
-              </AuthDialog>
+              {!user && (
+                <AuthDialog>
+                  <button
+                    onClick={() => setIsOpen(false)}
+                    className="w-full text-xs font-black uppercase tracking-[0.4em] border border-border p-4 block text-center"
+                  >
+                    Authorized Login
+                  </button>
+                </AuthDialog>
+              )}
               <Link
-                href="/"
+                href={user ? "/" : "/login"}
                 onClick={() => setIsOpen(false)}
                 className="text-xs font-black uppercase tracking-[0.4em] bg-foreground text-background p-4 block text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]"
               >
-                Execute Systems Terminal
+                {user ? "Execute Systems Terminal" : "Start For Free"}
               </Link>
             </div>
           </div>

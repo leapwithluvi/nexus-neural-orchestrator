@@ -1,8 +1,7 @@
 export const systemMetadata = [
-    { label: "Build_Status", value: "v4.0.1_STABLE", color: "text-emerald-500" },
-    { label: "Node_Origin", value: "SEA_REG_ID_01", color: "" },
-    { label: "Architect_Ref", value: "LUVI_APRILYANSYAH_GABRIEL", color: "underline" },
-    { label: "Neural_Core", value: "GEMMA_4.0_FLASH", color: "" },
+    { label: "Build Status", value: "v4.0.1 STABLE", color: "text-emerald-500" },
+    { label: "Node Origin", value: "SEA REG ID 01", color: "" },
+    { label: "Architect Ref", value: "LUVI APRILYANSYAH GABRIEL", color: "underline" },
 ];
 
 export const footerManifest = {

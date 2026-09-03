@@ -12,24 +12,24 @@ export const socialLinks = [
         name: "GitHub",
         icon: Code2,
         href: "https://github.com/leapwithluvi",
-        label: "Source_Repository"
+        label: "Repository"
     },
     {
         name: "LinkedIn",
         icon: User,
         href: "https://www.linkedin.com/in/luviaprilyansyahgabriel",
-        label: "Architect_Profile"
+        label: "Architect Profile"
     },
     {
         name: "Twitter",
         icon: Send,
         href: "https://twitter.com",
-        label: "Neural_Broadcast"
+        label: "Neural Broadcast"
     },
     {
         name: "Email",
         icon: Mail,
         href: "mailto:itsluvi13@gmail.com",
-        label: "Direct_Liaison"
+        label: "Direct Liaison"
     }
 ];

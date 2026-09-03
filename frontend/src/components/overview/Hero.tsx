@@ -8,7 +8,7 @@ const Hero = () => {
     <section className="relative min-h-[50vh] flex flex-col justify-center pt-24 md:pt-32 pb-20 overflow-hidden">
       <div className="mono-container">
         <div className="flex flex-col mb-24">
-            <span className="label-mono mb-8 block animate-fadeIn">Portfolio Project • System Protocol v4.01 • Powered by Gemma 4 API</span>
+            <span className="label-mono mb-8 block animate-fadeIn">Portfolio Project</span>
             <h1 className="text-huge animate-slideUp leading-[0.9]">
                 ADVANCED <br />
                 COGNITION.
@@ -18,7 +18,7 @@ const Hero = () => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 border-t border-border pt-12 items-start">
             <div className="lg:col-span-4 space-y-4">
                 <span className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground border-b border-border pb-1 inline-block">
-                    Mission_Manifest
+                    MissionManifest
                 </span>
                 <p className="text-lg leading-[1.4] font-medium text-foreground italic">
                     Our platform provides high-integrity artificial intelligence for critical operations. 

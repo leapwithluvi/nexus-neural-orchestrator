@@ -427,7 +427,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       const res = await apiFetch("/api/v1/conversations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: initialMessage ? initialMessage.slice(0, 50) : "New Chat" })
+        body: JSON.stringify({ title: "New Chat" })
       });
       if (!res.ok) throw new Error("Failed to create conversation in database");
       const json = await res.json();
@@ -441,7 +441,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       id: newConversationId,
       userId: user?.id || "",
       username: user?.name || "User",
-      name: initialMessage ? initialMessage.slice(0, 50) : "New Chat",
+      name: "New Chat",
       messages: [],
       updatedAt: new Date().toISOString(),
       createdAt: new Date().toISOString(),

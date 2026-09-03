@@ -24,6 +24,11 @@ export const chatHandler = {
     } else {
       const conv = await conversationService.getConversationById(conversationId, user.id)
       if (!conv) return c.json({ error: 'Conversation not found' }, 404)
+      
+      // If the frontend created the conversation with a default title, trigger generation
+      if (conv.title === 'New Chat' || conv.title === 'New Conversation') {
+        isNewConversation = true
+      }
     }
 
     // Fire and forget Auto-Title Generation without awaiting it

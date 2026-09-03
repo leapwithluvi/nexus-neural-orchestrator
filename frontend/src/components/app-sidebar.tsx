@@ -105,9 +105,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarHeader className="border-b border-border p-4">
         <SidebarMenuButton asChild size="lg" className="hover:bg-transparent p-0 w-full justify-start">
           <Link href="/" className="flex items-center gap-3 w-full">
-            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
-              <MessageSquare size={18} className="text-primary-foreground" />
-            </div>
             <span className="font-semibold text-lg truncate">Nexus AI</span>
           </Link>
         </SidebarMenuButton>

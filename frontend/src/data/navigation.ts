@@ -3,6 +3,6 @@ export const navLinks = [
   { name: "Features", href: "/overview#features" },
   { name: "Procedure", href: "/overview#how-it-works" },
   { name: "Pricing", href: "/overview#pricing" },
-  { name: "Docs_Core", href: "/docs" },
+  { name: "Docs Core", href: "/docs" },
   { name: "Liaison", href: "/overview#contact" },
 ];
