@@ -1,9 +1,9 @@
 import { Hono } from 'hono'
-import { authHandler } from '../handlers/auth.handler'
-import { authenticate, requireAuth } from '../middleware/auth'
+import { authHandler } from '../handlers/auth.handler.js'
+import { authenticate, requireAuth } from '../middleware/auth.js'
 import { zValidator } from '@hono/zod-validator'
-import { updateProfileSchema } from '../validators/schemas'
-import type { HonoEnv, ApiResponse } from '../types'
+import { updateProfileSchema } from '../validators/schemas.js'
+import type { HonoEnv, ApiResponse } from '../types/index.js'
 
 const router = new Hono<HonoEnv>()
 

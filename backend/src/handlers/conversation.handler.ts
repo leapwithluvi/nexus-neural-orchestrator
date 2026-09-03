@@ -1,8 +1,8 @@
 import type { Context } from 'hono'
-import { conversationService } from '../services/conversation.service'
-import type { HonoEnv, ApiResponse } from '../types'
+import { conversationService } from '../services/conversation.service.js'
+import type { HonoEnv, ApiResponse } from '../types/index.js'
 import type { z } from 'zod'
-import type { createConversationSchema, updateConversationSchema } from '../validators/schemas'
+import type { createConversationSchema, updateConversationSchema } from '../validators/schemas.js'
 
 const createSuccess = <T>(data: T, c: Context): ApiResponse<T> => ({
   success: true,

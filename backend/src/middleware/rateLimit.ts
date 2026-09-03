@@ -1,9 +1,9 @@
 import type { Context, Next } from 'hono'
-import { db } from '../db/client'
-import { rateLimits } from '../db/schema'
+import { db } from '../db/client.js'
+import { rateLimits } from '../db/schema.js'
 import { eq, and } from 'drizzle-orm'
-import { env } from '../config/env'
-import type { ApiResponse } from '../types'
+import { env } from '../config/env.js'
+import type { ApiResponse } from '../types/index.js'
 
 // DB-backed rate limiter middleware.
 // Uses the rate_limits table to track request counts per identifier + endpoint.

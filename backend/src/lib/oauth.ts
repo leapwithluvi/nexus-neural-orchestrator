@@ -1,5 +1,5 @@
 import { GitHub, Google } from 'arctic'
-import { env } from '../config/env'
+import { env } from '../config/env.js'
 
 export const googleAuth = new Google(
   env.oauth.google.clientId,

@@ -1,6 +1,6 @@
 import { sign, verify } from 'hono/jwt'
-import { env } from '../config/env'
-import type { TokenPayload } from '../types'
+import { env } from '../config/env.js'
+import type { TokenPayload } from '../types/index.js'
 
 export const signAccessToken = async (payload: Omit<TokenPayload, 'type' | 'exp' | 'iat'>) => {
   const iat = Math.floor(Date.now() / 1000)

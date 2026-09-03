@@ -1,10 +1,10 @@
 import type { Context, Next } from 'hono'
 import { getCookie } from 'hono/cookie'
-import { verifyAccessToken } from '../lib/jwt'
-import { db } from '../db/client'
-import { users } from '../db/schema'
+import { verifyAccessToken } from '../lib/jwt.js'
+import { db } from '../db/client.js'
+import { users } from '../db/schema.js'
 import { eq } from 'drizzle-orm'
-import type { HonoEnv, ApiResponse } from '../types'
+import type { HonoEnv, ApiResponse } from '../types/index.js'
 
 /**
  * Parses JWT from context (cookie or Authorization header)

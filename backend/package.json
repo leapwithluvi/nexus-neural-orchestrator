@@ -5,6 +5,7 @@
   "author": "Rekayasa Studio",
   "license": "MIT",
   "main": "src/index.ts",
+  "type": "module",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "dev:token": "bun run scripts/get-token.ts",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "drizzle-kit": "^0.31.10"
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^7.0.2"
   }
 }

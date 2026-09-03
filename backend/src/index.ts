@@ -3,8 +3,8 @@ import { logger } from 'hono/logger'
 import { cors } from 'hono/cors'
 import { secureHeaders } from 'hono/secure-headers'
 import { compress } from 'hono/compress'
-import { env } from './config/env'
-import type { ApiResponse } from './types'
+import { env } from './config/env.js'
+import type { ApiResponse } from './types/index.js'
 
 const app = new Hono()
 
@@ -73,7 +73,7 @@ app.get('/health', (c) => {
   })
 })
 
-import apiRouter from './routes/index'
+import apiRouter from './routes/index.js'
 
 // ==========================================
 // API ROUTES

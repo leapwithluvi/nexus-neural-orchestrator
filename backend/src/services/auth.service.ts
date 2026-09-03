@@ -1,7 +1,7 @@
-import { db } from '../db/client'
-import { users, oauthAccounts, refreshTokens } from '../db/schema'
+import { db } from '../db/client.js'
+import { users, oauthAccounts, refreshTokens } from '../db/schema.js'
 import { eq, and, sql } from 'drizzle-orm'
-import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../lib/jwt'
+import { signAccessToken, signRefreshToken, verifyRefreshToken } from '../lib/jwt.js'
 
 interface OAuthProfile {
   email: string

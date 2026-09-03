@@ -1,5 +1,5 @@
-import { db } from '../db/client'
-import { conversations, messages } from '../db/schema'
+import { db } from '../db/client.js'
+import { conversations, messages } from '../db/schema.js'
 import { eq, and, desc } from 'drizzle-orm'
 
 export const conversationService = {

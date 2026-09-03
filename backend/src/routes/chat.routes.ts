@@ -1,9 +1,9 @@
 import { Hono } from 'hono'
-import { authenticate, requireAuth } from '../middleware/auth'
-import { chatHandler } from '../handlers/chat.handler'
+import { authenticate, requireAuth } from '../middleware/auth.js'
+import { chatHandler } from '../handlers/chat.handler.js'
 import { zValidator } from '@hono/zod-validator'
-import { chatMessageSchema } from '../validators/schemas'
-import type { HonoEnv } from '../types'
+import { chatMessageSchema } from '../validators/schemas.js'
+import type { HonoEnv } from '../types/index.js'
 
 const router = new Hono<HonoEnv>()
 

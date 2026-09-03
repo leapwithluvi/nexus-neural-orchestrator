@@ -1,7 +1,7 @@
 import { Groq } from 'groq-sdk'
-import { env } from '../config/env'
-import { db } from '../db/client'
-import { messages } from '../db/schema'
+import { env } from '../config/env.js'
+import { db } from '../db/client.js'
+import { messages } from '../db/schema.js'
 import { eq } from 'drizzle-orm'
 import type { ChatCompletionMessageParam } from 'groq-sdk/resources/chat/completions'
 

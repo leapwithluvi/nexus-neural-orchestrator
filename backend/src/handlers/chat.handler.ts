@@ -1,11 +1,11 @@
 import type { Context } from 'hono'
 import { streamSSE } from 'hono/streaming'
-import { chatService } from '../services/chat.service'
-import { conversationService } from '../services/conversation.service'
-import { env } from '../config/env'
+import { chatService } from '../services/chat.service.js'
+import { conversationService } from '../services/conversation.service.js'
+import { env } from '../config/env.js'
 import type { z } from 'zod'
-import type { chatMessageSchema } from '../validators/schemas'
-import type { HonoEnv } from '../types'
+import type { chatMessageSchema } from '../validators/schemas.js'
+import type { HonoEnv } from '../types/index.js'
 
 export const chatHandler = {
   async stream(c: Context<HonoEnv>) {
