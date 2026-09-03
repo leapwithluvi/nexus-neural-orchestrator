@@ -5,7 +5,6 @@
     "moduleResolution": "NodeNext",
     "strict": true,
     "skipLibCheck": true,
-    "types": ["@types/bun"],
     "jsx": "react-jsx",
     "jsxImportSource": "hono/jsx"
   },
