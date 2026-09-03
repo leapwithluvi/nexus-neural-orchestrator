@@ -1,4 +1,6 @@
-import { handle } from 'hono/vercel'
+import { getRequestListener } from '@hono/node-server'
 import app from '../src/index.js'
 
-export default handle(app)
+declare const process: any;
+
+export default getRequestListener(app.fetch)
