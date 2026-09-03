@@ -6,6 +6,8 @@ import { compress } from 'hono/compress'
 import { env } from './config/env.js'
 import type { ApiResponse } from './types/index.js'
 
+declare const process: any;
+
 const app = new Hono()
 
 // ==========================================
