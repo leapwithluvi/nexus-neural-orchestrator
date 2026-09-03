@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/node": "^26.4.1",
     "drizzle-kit": "^0.31.10",
     "typescript": "^7.0.2"
   }
