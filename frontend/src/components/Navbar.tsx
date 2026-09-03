@@ -51,15 +51,6 @@ const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-4 md:gap-8">
-          {!user && (
-            <AuthDialog>
-              <button
-                className="hidden md:block px-5 py-2 border border-border text-foreground text-[10px] font-black uppercase tracking-widest hover:bg-muted transition-all"
-              >
-                Authorized Login
-              </button>
-            </AuthDialog>
-          )}
 
           <Link
             href={user ? "/" : "/login"}
@@ -96,22 +87,12 @@ const Navbar = () => {
               </Link>
             ))}
             <div className="pt-8 border-t border-border space-y-4">
-              {!user && (
-                <AuthDialog>
-                  <button
-                    onClick={() => setIsOpen(false)}
-                    className="w-full text-xs font-black uppercase tracking-[0.4em] border border-border p-4 block text-center"
-                  >
-                    Authorized Login
-                  </button>
-                </AuthDialog>
-              )}
               <Link
                 href={user ? "/" : "/login"}
                 onClick={() => setIsOpen(false)}
                 className="text-xs font-black uppercase tracking-[0.4em] bg-foreground text-background p-4 block text-center shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)]"
               >
-                {user ? "Execute Systems Terminal" : "Start For Free"}
+                {user ? "Execute Terminal" : "Start For Free"}
               </Link>
             </div>
           </div>
