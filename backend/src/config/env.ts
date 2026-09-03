@@ -36,12 +36,17 @@ const envSchema = z.object({
 // Validate at startup — throws with clear error if any env var is missing/invalid
 const parsed = envSchema.safeParse(process.env)
 
+let _env: z.infer<typeof envSchema>;
+
 if (!parsed.success) {
   const msg = '❌ Invalid environment variables:\n' + JSON.stringify(parsed.error.flatten().fieldErrors, null, 2)
-  throw new Error(msg)
+  console.error(msg)
+  // Fallback to empty strings so the server boots up and Vercel can log the error, 
+  // instead of crashing the Lambda container immediately (which hides logs).
+  _env = {} as z.infer<typeof envSchema>;
+} else {
+  _env = parsed.data;
 }
-
-const _env = parsed.data
 
 // Export structured config object (same shape as backup config/index.ts)
 export const env = {
