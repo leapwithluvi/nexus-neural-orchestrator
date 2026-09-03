@@ -5,7 +5,6 @@
   "author": "Rekayasa Studio",
   "license": "MIT",
   "main": "src/index.ts",
-  "type": "module",
   "scripts": {
     "dev": "bun run --hot src/index.ts",
     "dev:token": "bun run scripts/get-token.ts",
