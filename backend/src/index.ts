@@ -121,9 +121,6 @@ app.onError((err, c) => {
 })
 
 // ==========================================
-// START SERVER
+// EXPPORT APP
 // ==========================================
-export default {
-  port: env.port,
-  fetch: app.fetch,
-}
+export default app
