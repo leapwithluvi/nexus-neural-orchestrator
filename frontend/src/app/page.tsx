@@ -194,7 +194,16 @@ function ChatPageContent() {
           )}
         </div>
 
-        <div className="shrink-0 pb-4 px-4">
+        <div className="shrink-0 pb-4 px-4 flex flex-col items-center max-w-3xl mx-auto w-full">
+          {!user && !isAuthLoading && (
+            <Link href="/login" className="mb-4 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20 hover:scale-[1.02] active:scale-95 transition-all border border-emerald-500/20 px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-3 w-fit">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              System Access Required to Transmit Messages — Login Now
+            </Link>
+          )}
           <ChatInput onSend={handleSend} />
         </div>
       </SidebarInset>

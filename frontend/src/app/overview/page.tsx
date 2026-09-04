@@ -8,7 +8,6 @@ import HowItWorks from "@/components/overview/HowItWorks";
 import Contact from "@/components/overview/Contact";
 import Pricing from "@/components/overview/Pricing";
 import { techStack } from "@/data/techstack";
-import { Gemma } from "@lobehub/icons";
 import { socialLinks } from "@/data/contact";
 import { systemMetadata, footerManifest } from "@/data/metadata";
 
@@ -39,9 +38,7 @@ export default function OverviewPage() {
                                 alt={tech.name}
                                 className="h-6 w-6 object-contain"
                             />
-                        ) : (
-                            <Gemma size={24} />
-                        )}
+                        ) : null}
                         <span className="text-xl font-black uppercase tracking-tighter italic">{tech.name}</span>
                     </div>
                 ))}

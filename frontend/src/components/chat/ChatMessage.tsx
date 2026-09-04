@@ -52,7 +52,7 @@ export const ChatMessage = ({ role, content, timestamp, isStreaming, telemetry }
         )}
       >
         <div className="flex flex-col items-end gap-1 max-w-[75%]">
-          <div className="px-4 py-2.5 rounded-2xl rounded-br-sm bg-primary text-primary-foreground text-[15px] leading-relaxed break-words">
+          <div className="px-4 py-2.5 rounded-2xl rounded-br-sm bg-emerald-500 text-white font-medium text-[15px] leading-relaxed break-words shadow-sm">
             {content}
           </div>
           <time className="text-xs text-muted-foreground/50 px-1">
