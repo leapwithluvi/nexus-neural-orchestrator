@@ -37,6 +37,7 @@ import { useAppContext } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
 
 import { userProfile } from "@/data/profile";
+import Logo from "./Logo";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const context = useAppContext();
@@ -104,8 +105,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     <Sidebar variant="sidebar" className="border-r border-border bg-background" {...props}>
       <SidebarHeader className="border-b border-border p-4">
         <SidebarMenuButton asChild size="lg" className="hover:bg-transparent p-0 w-full justify-start">
-          <Link href="/" className="flex items-center gap-3 w-full">
-            <span className="font-semibold text-lg truncate">Nexus AI</span>
+          <Link href="/overview" className="flex items-center gap-3 w-full">
+            <Logo size={28} />
           </Link>
         </SidebarMenuButton>
       </SidebarHeader>

@@ -14,6 +14,7 @@ import { MessageSquare, Sparkles } from "lucide-react";
 import { useAppContext } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
+import Logo from "@/components/Logo";
 
 interface Message {
   id: string;
@@ -98,16 +99,21 @@ function ChatPageContent() {
           ref={messagesContainerRef}
           className={cn(
             "flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-border/50 scrollbar-track-transparent py-4",
-            openMobile && "overflow-hidden"
+            openMobile && "overflow-hidden",
           )}
         >
           {isAuthLoading || isMessagesLoading ? (
             <div className="flex flex-col gap-6 max-w-3xl mx-auto w-full px-4 h-full">
               {[1, 2, 3].map((i) => (
-                <div key={i} className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"} w-full`}>
-                  <div className={`w-[60%] sm:w-[45%] h-16 rounded-2xl animate-pulse ${
-                    i % 2 === 0 ? "bg-primary/20" : "bg-muted"
-                  }`} />
+                <div
+                  key={i}
+                  className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"} w-full`}
+                >
+                  <div
+                    className={`w-[60%] sm:w-[45%] h-16 rounded-2xl animate-pulse ${
+                      i % 2 === 0 ? "bg-primary/20" : "bg-muted"
+                    }`}
+                  />
                 </div>
               ))}
             </div>
@@ -117,33 +123,40 @@ function ChatPageContent() {
                 <div key={date} className="flex flex-col gap-3">
                   <div className="flex items-center gap-2 text-xs text-muted-foreground/60 px-4">
                     <span className="font-medium">
-                      {date === new Date().toDateString() ? "Today" :
-                       date === new Date(Date.now() - 86400000).toDateString() ? "Yesterday" : date}
+                      {date === new Date().toDateString()
+                        ? "Today"
+                        : date ===
+                            new Date(Date.now() - 86400000).toDateString()
+                          ? "Yesterday"
+                          : date}
                     </span>
                   </div>
-                  {msgs.map(({ id, role, content, timestamp, telemetry }, index) => (
-                    <ChatMessage
-                      key={id || `${timestamp}-${index}`}
-                      role={role}
-                      content={content}
-                      timestamp={timestamp}
-                      telemetry={telemetry}
-                    />
-                  ))}
+                  {msgs.map(
+                    ({ id, role, content, timestamp, telemetry }, index) => (
+                      <ChatMessage
+                        key={id || `${timestamp}-${index}`}
+                        role={role}
+                        content={content}
+                        timestamp={timestamp}
+                        telemetry={telemetry}
+                      />
+                    ),
+                  )}
                 </div>
               ))}
               <div ref={messagesEndRef} className="h-4" />
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center h-full px-6 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-6">
-                <MessageSquare size={32} className="text-primary" />
+              <div className="w-16 h-16 flex items-center justify-center mb-6">
+                <Logo size={40} />
               </div>
               <h2 className="text-2xl font-semibold text-foreground mb-2">
                 How can I help you today?
               </h2>
               <p className="text-muted-foreground max-w-md mb-8 leading-relaxed">
-                Ask questions, get analysis, write code, or just chat — I'm here to help with whatever you need.
+                Ask questions, get analysis, write code, or just chat — I'm here
+                to help with whatever you need.
               </p>
             </div>
           )}
