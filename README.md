@@ -6,7 +6,8 @@
 [![GitHub commits](https://img.shields.io/github/commit-activity/t/leapwithluvi/nexus-neural-orchestrator?style=social&logo=github)](https://github.com/leapwithluvi/nexus-neural-orchestrator/commits)
 [![Pull requests](https://img.shields.io/github/issues-pr/leapwithluvi/nexus-neural-orchestrator?style=social&logo=github)](https://github.com/leapwithluvi/nexus-neural-orchestrator/pulls)
 
-![Nexus AI Showcase](./frontend/public/implement1.mp4)
+<video src="./frontend/public/imdplement1.mp4" controls autoplay muted loop width="100%">
+</video>
 
 [![leapwithluvi](https://custom-icon-badges.demolab.com/badge/made%20by%20-leapwithluvi-556bf2?logo=github&logoColor=white&labelColor=101827)](https://github.com/leapwithluvi)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?color=dddddd&labelColor=000000)](https://github.com/leapwithluvi/nexus-neural-orchestrator/blob/main/LICENSE)
@@ -17,7 +18,7 @@
 
 # Live Preview
 
-![Nexus AI Showcase #2](./frontend/public/implement2.mp4)
+<video src="./frontend/public/implement2.mp4" controls autoplay muted loop width="100%"></video>
 
 **[Visit Nexus AI Live → nexusai.my.id](https://www.nexusai.my.id)**
 
