@@ -20,7 +20,7 @@ const Pricing = () => {
                             Currently in alpha stage. All tiers are subject to dynamic scaling and development status.
                         </p>
                         <div className="text-[10px] bg-foreground text-background inline-block px-2 py-0.5 font-bold tracking-widest uppercase">
-                            Gemma 4.0 Integrated
+                            Groq Integrated
                         </div>
                     </div>
                 </div>
@@ -67,7 +67,7 @@ const Pricing = () => {
                 <div className="mt-20 border-l-2 border-border pl-8">
                     <p className="text-xs text-muted-foreground uppercase tracking-widest leading-relaxed font-medium">
                         *Nexus AI is currently providing free, non-guaranteed access for public testing. 
-                        System availability and model performance (Gemma 4.0) are undergoing active calibration.
+                        System availability and model performance (Groq) are undergoing active calibration.
                     </p>
                 </div>
             </div>

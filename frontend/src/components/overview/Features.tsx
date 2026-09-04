@@ -7,7 +7,7 @@ const Features = () => {
     <section id="features" className="py-20 md:py-40 bg-foreground text-background">
       <div className="mono-container">
         <div className="flex flex-col mb-20 md:mb-32 border-l border-background/20 pl-8">
-            <span className="label-mono mb-4 text-background/50">Core Infrastructure • Integrating Gemma 4.0</span>
+            <span className="label-mono mb-4 text-background/50">Core Infrastructure • Integrating Groq</span>
             <h2 className="text-5xl md:text-7xl font-bold tracking-tighter leading-none mb-4 lowercase">
                 Technical Specifications.
             </h2>
