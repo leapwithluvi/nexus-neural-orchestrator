@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppContextProvider } from "@/context/AppContext";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,6 +23,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { Suspense } from "react";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -36,9 +39,12 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <AppContextProvider>
-            {children}
-          </AppContextProvider>
+          <Suspense fallback={null}>
+            <AppContextProvider>
+              {children}
+              <Toaster position="top-center" richColors theme="system" />
+            </AppContextProvider>
+          </Suspense>
         </ThemeProvider>
       </body>
     </html>

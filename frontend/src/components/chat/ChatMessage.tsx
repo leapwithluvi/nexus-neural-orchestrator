@@ -94,7 +94,7 @@ export const ChatMessage = ({ role, content, timestamp, isStreaming, telemetry }
         </div>
 
         {/* Typing indicator while AI is thinking and content is empty */}
-        {isStreaming && !content && (
+        {!content && (
           <div className="flex gap-1 items-center h-5 mt-1">
             <div className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:-0.3s]" />
             <div className="w-1.5 h-1.5 rounded-full bg-foreground/40 animate-bounce [animation-delay:-0.15s]" />

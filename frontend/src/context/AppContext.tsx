@@ -1,8 +1,9 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/api";
+import { toast } from "sonner";
 
 interface Message {
   id: string;
@@ -153,6 +154,23 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Record<string, Message[]>>({});
   const [theme, setTheme] = useState("light");
+  const searchParams = useSearchParams();
+
+  // Add toast on login success/error
+  useEffect(() => {
+    const loginStatus = searchParams.get("login");
+    if (loginStatus === "success") {
+      toast.success("Successfully logged in!");
+      // Clean up URL
+      if (window.history.replaceState) {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("login");
+        window.history.replaceState({}, "", url.toString());
+      }
+    } else if (loginStatus === "error") {
+      toast.error("Failed to login. Please try again.");
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light";
@@ -336,79 +354,97 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       const decoder = new TextDecoder();
       if (!reader) return;
 
-      let aiContent = "";
-      let telemetryData: any = undefined;
+      // Extract streaming logic to run asynchronously
+      const processStream = async () => {
+        let aiContent = "";
+        let telemetryData: any = undefined;
 
-      while (true) {
-        const { done, value } = await reader.read();
-        
-        const chunkText = decoder.decode(value, { stream: true });
-        const lines = chunkText.split("\n\n").filter(Boolean);
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const parsed = JSON.parse(line.slice(6));
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
             
-            if (parsed.type === "chunk") {
-              aiContent += parsed.content;
-              
-              // RE-RENDER CHAT BUBBLE DURING STREAMING PROCESS
-              setMessages(prev => {
-                const currentMsgs = prev[chatId] || [];
-                const updatedList = [...currentMsgs];
-                updatedList[updatedList.length - 1] = { 
-                  ...updatedList[updatedList.length - 1], 
-                  content: aiContent 
-                };
-                return { ...prev, [chatId]: updatedList };
-              });
-              
-            } else if (parsed.type === "telemetry") {
-              // ATTACH TELEMETRY STATISTICS DATA IF PROVIDED BY GROQ
-              telemetryData = parsed.data;
-              setMessages(prev => {
-                const currentMsgs = prev[chatId] || [];
-                const updatedList = [...currentMsgs];
-                updatedList[updatedList.length - 1] = { 
-                  ...updatedList[updatedList.length - 1], 
-                  telemetry: telemetryData 
-                };
-                return { ...prev, [chatId]: updatedList };
-              });
-            } else if (parsed.type === "done") {
-              // Update timestamp immediately
-              setChats(prev => prev.map(chat =>
-                chat.id === chatId ? { ...chat, updatedAt: new Date().toISOString() } : chat
-              ));
-              // Poll for the AI-generated title (backend generates it async after stream)
-              // Retry up to 4 times with 1.5s delay to wait for title generation
-              (async () => {
-                const DEFAULT_TITLES = ["New Chat", "New Conversation", ""];
-                for (let attempt = 0; attempt < 4; attempt++) {
-                  await new Promise(r => setTimeout(r, 1500));
-                  try {
-                    const titleRes = await apiFetch(`/api/v1/conversations/${chatId}`);
-                    if (titleRes.ok) {
-                      const titleData = await titleRes.json();
-                      const newTitle = titleData?.data?.title;
-                      if (newTitle && !DEFAULT_TITLES.includes(newTitle)) {
-                        setChats(prev => prev.map(chat =>
-                          chat.id === chatId ? { ...chat, name: newTitle } : chat
-                        ));
-                        break; // Got a real title, stop polling
-                      }
+            const chunkText = decoder.decode(value, { stream: true });
+            const lines = chunkText.split("\n\n").filter(Boolean);
+
+            for (const line of lines) {
+              if (line.startsWith("data: ")) {
+                const parsed = JSON.parse(line.slice(6));
+                
+                if (parsed.type === "chunk") {
+                  aiContent += parsed.content;
+                  
+                  // RE-RENDER CHAT BUBBLE DURING STREAMING PROCESS
+                  setMessages(prev => {
+                    const currentMsgs = prev[chatId] || [];
+                    const updatedList = [...currentMsgs];
+                    // Update only if it's the AI message
+                    if (updatedList[updatedList.length - 1].role === "assistant") {
+                      updatedList[updatedList.length - 1] = { 
+                        ...updatedList[updatedList.length - 1], 
+                        content: aiContent 
+                      };
                     }
-                  } catch {
-                    // Non-critical
-                  }
+                    return { ...prev, [chatId]: updatedList };
+                  });
+                  
+                } else if (parsed.type === "telemetry") {
+                  telemetryData = parsed.data;
+                  setMessages(prev => {
+                    const currentMsgs = prev[chatId] || [];
+                    const updatedList = [...currentMsgs];
+                    if (updatedList[updatedList.length - 1].role === "assistant") {
+                      updatedList[updatedList.length - 1] = { 
+                        ...updatedList[updatedList.length - 1], 
+                        telemetry: telemetryData 
+                      };
+                    }
+                    return { ...prev, [chatId]: updatedList };
+                  });
+                } else if (parsed.type === "done") {
+                  setChats(prev => prev.map(chat =>
+                    chat.id === chatId ? { ...chat, updatedAt: new Date().toISOString() } : chat
+                  ));
+                  // Poll for AI-generated title
+                  (async () => {
+                    const DEFAULT_TITLES = ["New Chat", "New Conversation", ""];
+                    for (let attempt = 0; attempt < 4; attempt++) {
+                      await new Promise(r => setTimeout(r, 1500));
+                      try {
+                        const titleRes = await apiFetch(`/api/v1/conversations/${chatId}`);
+                        if (titleRes.ok) {
+                          const titleData = await titleRes.json();
+                          const newTitle = titleData?.data?.title;
+                          if (newTitle && !DEFAULT_TITLES.includes(newTitle)) {
+                            setChats(prev => prev.map(chat =>
+                              chat.id === chatId ? { ...chat, name: newTitle } : chat
+                            ));
+                            break;
+                          }
+                        }
+                      } catch { } // Non-critical
+                    }
+                  })();
                 }
-              })();
+              }
             }
+            if (done) break;
           }
+        } catch (error) {
+          console.error("[Stream Error]", error);
+          setMessages(prev => {
+            const msgs = prev[chatId] || [];
+            if (msgs[msgs.length - 1].role === "assistant") {
+              msgs[msgs.length - 1].content = "⚠️ *Failed to reach AI Core. Stream interupted.*";
+            }
+            return { ...prev, [chatId]: [...msgs] };
+          });
         }
-        
-        if (done) break;
-      }
+      };
+
+      // Run stream processor in background without blocking the return!
+      processStream();
+      return; // Return immediately to clear the UI input box!
+
     } catch (error) {
       console.error("[Stream Error]", error);
       // Error state fallback
@@ -453,7 +489,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     setMessages(prev => ({ ...prev, [newChat.id]: [] }));
 
     if (initialMessage) {
-      await sendMessage(newChat.id, initialMessage);
+      sendMessage(newChat.id, initialMessage).catch(console.error); // Fire and forget
     }
 
     return newChat;
@@ -538,15 +574,17 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       await apiFetch("/api/v1/auth/logout", {
         method: "POST",
       });
+      toast.info("Logged out successfully");
     } catch {
       // Proceed with local cleanup even if logout endpoint fails
+      toast.error("Logout completed locally (server error)");
     } finally {
       setUser(null);
       setChats([]);
       setSelectedChat(null);
       setCurrentChatId(null);
       setMessages({});
-      router.push("/login");
+      router.push("/"); // Changed from /login to / to match requirement
     }
   };
 
