@@ -490,12 +490,20 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     setCurrentChatId(newChat.id);
     setMessages(prev => ({ ...prev, [newChat.id]: [] }));
 
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.set("c", newChat.id);
+      window.history.replaceState({}, "", url.toString());
+    }
+
     if (initialMessage) {
-      sendMessage(newChat.id, initialMessage).catch(console.error); // Fire and forget
+      // Send the initial message and trigger AI stream
+      // We don't await this so the UI responds instantly
+      sendMessage(newConversationId, initialMessage).catch(console.error);
     }
 
     return newChat;
-  }, [sendMessage, user]);
+  }, [user, sendMessage]);
 
   const deleteChat = useCallback(async (chatId: string) => {
     // Delete in frontend
@@ -589,7 +597,12 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       setSelectedChat(null);
       setCurrentChatId(null);
       setMessages({});
-      router.push("/"); // Changed from /login to / to match requirement
+      
+      // Completely clear URL state without reloading
+      if (typeof window !== "undefined") {
+        window.history.replaceState({}, "", "/");
+      }
+      router.push("/");
     }
   };
 

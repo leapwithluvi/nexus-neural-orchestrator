@@ -63,8 +63,9 @@ function ChatPageContent() {
       return;
     }
     if (!currentChatId) {
-      const newChat = await createChat(message);
-      setCurrentChat(newChat.id);
+      // createChat already updates selected chat, internal state, and URL, 
+      // AND kicks off the message transmission safely without race conditions!
+      await createChat(message);
       return;
     }
     setIsLoading(true);
