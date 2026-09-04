@@ -33,7 +33,10 @@ export default function ChatPage() {
 
 function ChatPageContent() {
   const { openMobile } = useSidebar();
-  const { user, chats, currentChatId, messages, sendMessage, createChat, setCurrentChat } = useAppContext();
+  const { 
+    user, chats, currentChatId, messages, sendMessage, createChat, setCurrentChat,
+    isAuthLoading, isMessagesLoading
+  } = useAppContext();
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -98,7 +101,17 @@ function ChatPageContent() {
             openMobile && "overflow-hidden"
           )}
         >
-          {currentChatId && currentMessages.length > 0 ? (
+          {isAuthLoading || isMessagesLoading ? (
+            <div className="flex flex-col gap-6 max-w-3xl mx-auto w-full px-4 h-full">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"} w-full`}>
+                  <div className={`w-[60%] sm:w-[45%] h-16 rounded-2xl animate-pulse ${
+                    i % 2 === 0 ? "bg-primary/20" : "bg-muted"
+                  }`} />
+                </div>
+              ))}
+            </div>
+          ) : currentChatId && currentMessages.length > 0 ? (
             <div className="flex flex-col gap-1 max-w-3xl mx-auto w-full">
               {Object.entries(groupedMessages).map(([date, msgs]) => (
                 <div key={date} className="flex flex-col gap-3">
@@ -132,20 +145,6 @@ function ChatPageContent() {
               <p className="text-muted-foreground max-w-md mb-8 leading-relaxed">
                 Ask questions, get analysis, write code, or just chat — I'm here to help with whatever you need.
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-3 max-w-xl">
-                <button className="px-4 py-2.5 rounded-xl bg-muted hover:bg-muted/80 text-sm font-medium text-foreground transition-colors text-left w-full sm:w-auto">
-                  <span className="font-semibold">Summarize</span> a long article
-                </button>
-                <button className="px-4 py-2.5 rounded-xl bg-muted hover:bg-muted/80 text-sm font-medium text-foreground transition-colors text-left w-full sm:w-auto">
-                  <span className="font-semibold">Debug</span> this code snippet
-                </button>
-                <button className="px-4 py-2.5 rounded-xl bg-muted hover:bg-muted/80 text-sm font-medium text-foreground transition-colors text-left w-full sm:w-auto">
-                  <span className="font-semibold">Plan</span> a weekend trip
-                </button>
-                <button className="px-4 py-2.5 rounded-xl bg-muted hover:bg-muted/80 text-sm font-medium text-foreground transition-colors text-left w-full sm:w-auto">
-                  <span className="font-semibold">Explain</span> quantum computing
-                </button>
-              </div>
             </div>
           )}
         </div>

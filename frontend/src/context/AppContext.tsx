@@ -141,6 +141,7 @@ interface AppContextType {
   fetchUser: () => Promise<void>;
   signOut: () => void;
   isAuthLoading: boolean;
+  isMessagesLoading: boolean;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
@@ -154,6 +155,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Record<string, Message[]>>({});
   const [theme, setTheme] = useState("light");
+  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
   const searchParams = useSearchParams();
 
   // Add toast on login success/error
@@ -535,6 +537,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       
       // Fetch history if not already loaded locally
       if (!messages[id] || messages[id].length === 0) {
+        setIsMessagesLoading(true);
         try {
           const res = await apiFetch(`/api/v1/conversations/${id}`);
           if (res.ok) {
@@ -561,6 +564,8 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
           }
         } catch (e) {
           console.error("Failed to fetch historical messages", e);
+        } finally {
+          setIsMessagesLoading(false);
         }
       }
     } else {
@@ -607,6 +612,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     fetchUser,
     signOut,
     isAuthLoading,
+    isMessagesLoading,
   };
 
   return (
