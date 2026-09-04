@@ -6,8 +6,7 @@
 [![GitHub commits](https://img.shields.io/github/commit-activity/t/leapwithluvi/nexus-neural-orchestrator?style=social&logo=github)](https://github.com/leapwithluvi/nexus-neural-orchestrator/commits)
 [![Pull requests](https://img.shields.io/github/issues-pr/leapwithluvi/nexus-neural-orchestrator?style=social&logo=github)](https://github.com/leapwithluvi/nexus-neural-orchestrator/pulls)
 
-<video src="./frontend/public/imdplement1.mp4" controls autoplay muted loop width="100%">
-</video>
+[![Nexus AI Screenshot](./frontend/public/screenshot.png)](https://www.nexusai.my.id)
 
 [![leapwithluvi](https://custom-icon-badges.demolab.com/badge/made%20by%20-leapwithluvi-556bf2?logo=github&logoColor=white&labelColor=101827)](https://github.com/leapwithluvi)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?color=dddddd&labelColor=000000)](https://github.com/leapwithluvi/nexus-neural-orchestrator/blob/main/LICENSE)
@@ -19,9 +18,9 @@
 # Live Preview
 
 <div align="center">
-  <video src="https://raw.githubusercontent.com/leapwithluvi/nexus-neural-orchestrator/main/frontend/public/implement1.mp4" autoplay loop muted playsinline controls width="90%"></video>
+  <video src="https://raw.githubusercontent.com/leapwithluvi/nexus-neural-orchestrator/main/frontend/public/implement1.gif" autoplay loop muted playsinline controls width="90%"></video>
   <br/><br/>
-  <video src="https://raw.githubusercontent.com/leapwithluvi/nexus-neural-orchestrator/main/frontend/public/implement2.mp4" autoplay loop muted playsinline controls width="90%"></video>
+  <video src="https://raw.githubusercontent.com/leapwithluvi/nexus-neural-orchestrator/main/frontend/public/implement2.gif" autoplay loop muted playsinline controls width="90%"></video>
 </div>
 
 **[Visit Nexus AI Live → nexusai.my.id](https://www.nexusai.my.id)**
