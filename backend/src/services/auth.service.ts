@@ -15,57 +15,55 @@ export const authService = {
    * Links the OAuth account to the user in a single DB transaction.
    */
   async handleOAuthLogin(provider: 'google' | 'github', providerId: string, profile: OAuthProfile) {
-    return await db.transaction(async (tx) => {
-      // Check if this OAuth account is already linked to a user.
-      const [existingOAuth] = await tx
-        .select({ userId: oauthAccounts.userId })
-        .from(oauthAccounts)
-        .where(and(eq(oauthAccounts.provider, provider), eq(oauthAccounts.providerId, providerId)))
+    // Check if this OAuth account is already linked to a user.
+    const [existingOAuth] = await db
+      .select({ userId: oauthAccounts.userId })
+      .from(oauthAccounts)
+      .where(and(eq(oauthAccounts.provider, provider), eq(oauthAccounts.providerId, providerId)))
+      .limit(1)
+
+    if (existingOAuth) {
+      // OAuth account exists — fetch the user and update last login time.
+      const [user] = await db
+        .select()
+        .from(users)
+        .where(eq(users.id, existingOAuth.userId))
         .limit(1)
-
-      if (existingOAuth) {
-        // OAuth account exists — fetch the user and update last login time.
-        const [user] = await tx
-          .select()
-          .from(users)
-          .where(eq(users.id, existingOAuth.userId))
-          .limit(1)
-        await tx
-          .update(users)
-          .set({ lastLoginAt: new Date() })
-          .where(eq(users.id, user.id))
-        return user
-      }
-
-      // Check if a user with this email already exists (e.g. from another OAuth provider).
-      let [user] = await tx.select().from(users).where(eq(users.email, profile.email)).limit(1)
-
-      if (!user) {
-        // No existing user — create a new one.
-        // OAuth providers verify email, so emailVerified is set to true.
-        const [newUser] = await tx
-          .insert(users)
-          .values({
-            email: profile.email,
-            displayName: profile.displayName,
-            avatarUrl: profile.avatarUrl,
-            emailVerified: true,
-            lastLoginAt: new Date(),
-          })
-          .returning()
-        user = newUser
-      }
-
-      // Link the OAuth account to the user.
-      await tx.insert(oauthAccounts).values({
-        userId: user.id,
-        provider,
-        providerId,
-        accessToken: 'oauth_issued',
-      })
-
+      await db
+        .update(users)
+        .set({ lastLoginAt: new Date() })
+        .where(eq(users.id, user.id))
       return user
+    }
+
+    // Check if a user with this email already exists (e.g. from another OAuth provider).
+    let [user] = await db.select().from(users).where(eq(users.email, profile.email)).limit(1)
+
+    if (!user) {
+      // No existing user — create a new one.
+      // OAuth providers verify email, so emailVerified is set to true.
+      const [newUser] = await db
+        .insert(users)
+        .values({
+          email: profile.email,
+          displayName: profile.displayName,
+          avatarUrl: profile.avatarUrl,
+          emailVerified: true,
+          lastLoginAt: new Date(),
+        })
+        .returning()
+      user = newUser
+    }
+
+    // Link the OAuth account to the user.
+    await db.insert(oauthAccounts).values({
+      userId: user.id,
+      provider,
+      providerId,
+      accessToken: 'oauth_issued',
     })
+
+    return user
   },
 
   /**

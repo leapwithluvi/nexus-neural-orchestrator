@@ -74,6 +74,7 @@ export const authHandler = {
 
       return c.redirect(`${env.frontendUrl}?login=success`)
     } catch (e: any) {
+      console.error('[Google OAuth Error]', e)
       return c.redirect(`${env.frontendUrl}?login=error`)
     }
   },
@@ -137,6 +138,7 @@ export const authHandler = {
 
        return c.redirect(`${env.frontendUrl}?login=success`)
     } catch (e) {
+       console.error('[GitHub OAuth Error]', e)
        return c.redirect(`${env.frontendUrl}?login=error`)
     }
   },
