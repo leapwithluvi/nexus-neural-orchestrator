@@ -27,7 +27,13 @@ export default function OverviewPage() {
             <div className="flex animate-marquee whitespace-nowrap w-max">
                 {[...techStack, ...techStack, ...techStack, ...techStack].map((tech, i) => (
                     <div key={i} className="flex items-center gap-6 mx-16 opacity-40 hover:opacity-100 transition-opacity cursor-default grayscale hover:grayscale-0 group shrink-0">
-                        {tech.slug ? (
+                        {tech.imageUrl ? (
+                            <img 
+                                src={tech.imageUrl} 
+                                alt={tech.name}
+                                className="h-6 w-6 object-contain rounded-full"
+                            />
+                        ) : tech.slug ? (
                             <img 
                                 src={`https://cdn.simpleicons.org/${tech.slug}/${tech.color}`} 
                                 alt={tech.name}

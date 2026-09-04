@@ -1,7 +1,6 @@
 "use client";
 
 import { techStack } from "@/data/techstack";
-import { AuthDialog } from "../auth/AuthDialog";
 import { useAppContext } from "@/context/AppContext";
 import Link from "next/link";
 
@@ -27,17 +26,9 @@ const Hero = () => {
                     Our platform provides high-integrity artificial intelligence for critical operations. 
                     Built on secure architecture and validated models.
                 </p>
-                {user ? (
-                    <Link href="/" className="inline-block text-xs uppercase tracking-[0.2em] font-bold border-b-2 border-foreground pb-1 hover:opacity-70 transition-all cursor-pointer mt-4">
-                        Open Terminal
-                    </Link>
-                ) : (
-                    <AuthDialog>
-                        <button className="inline-block text-xs uppercase tracking-[0.2em] font-bold border-b-2 border-foreground pb-1 hover:opacity-70 transition-all cursor-pointer">
-                            Initiate Protocol
-                        </button>
-                    </AuthDialog>
-                )}
+                <Link href="/" className="inline-block text-xs uppercase tracking-[0.2em] font-bold border-b-2 border-foreground pb-1 hover:opacity-70 transition-all cursor-pointer mt-4">
+                    {user ? "Open Terminal" : "Start For Free"}
+                </Link>
             </div>
         </div>
 

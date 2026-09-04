@@ -6,7 +6,6 @@ import { ModeToggle } from "./mode-toggle";
 import { Menu, X } from "lucide-react";
 import Logo from "./Logo";
 import { navLinks } from "@/data/navigation";
-import { AuthDialog } from "./auth/AuthDialog";
 import { useAppContext } from "@/context/AppContext";
 
 const Navbar = () => {
