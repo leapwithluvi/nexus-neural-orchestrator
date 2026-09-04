@@ -305,6 +305,20 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     fetchUser();
   }, []);
 
+  useEffect(() => {
+    // Listen for global 401 unauthenticated events (e.g. Session expires mid-usage)
+    const handleAuthExpired = () => {
+      // We only care if we thought we were logged in
+      if (user) {
+        setUser(null);
+        router.push("/login?login=error&reason=expired");
+      }
+    };
+
+    window.addEventListener("auth-expired", handleAuthExpired);
+    return () => window.removeEventListener("auth-expired", handleAuthExpired);
+  }, [user, router]); // Re-bind if user state changes
+
   const sendMessage = useCallback(async (chatId: string, content: string) => {
     // 1. Add user message to state immediately
     const userMessage: Message = {
@@ -492,6 +506,9 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     setMessages(prev => ({ ...prev, [newChat.id]: [] }));
 
     const newParams = new URLSearchParams(searchParams.toString());
+    newParams.delete("login");
+    newParams.delete("error");
+    newParams.delete("reason");
     newParams.set("c", newChat.id);
     router.push(`/?${newParams.toString()}`);
 
@@ -528,8 +545,12 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   const setCurrentChat = useCallback(async (id: string | null) => {
     setCurrentChatId(id);
     
-    // Always navigate to root (/) while keeping other search params like login=success
+    // Always navigate to root (/) while avoiding stale Next.js cached auth params
     const newParams = new URLSearchParams(searchParams.toString());
+    newParams.delete("login");
+    newParams.delete("error");
+    newParams.delete("reason");
+    
     if (id) {
       newParams.set("c", id);
     } else {

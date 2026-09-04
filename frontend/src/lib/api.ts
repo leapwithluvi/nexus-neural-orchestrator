@@ -40,11 +40,10 @@ export const apiFetch = async (path: string, init?: RequestInit): Promise<Respon
     },
   });
 
-  // Global Session Manager: Automatically redirect to login if session expires
+  // Global Session Manager: Emit custom event if session expires
   if (response.status === 401 && typeof window !== "undefined") {
-    // Only redirect if we are not already on the login page or trying to fetch session
-    if (window.location.pathname !== "/login" && !path.includes("/auth/session") && !path.includes("/auth/logout")) {
-      window.location.href = `/login?login=error&reason=expired`;
+    if (!path.includes("/auth/")) {
+      window.dispatchEvent(new CustomEvent("auth-expired"));
     }
   }
 

@@ -18,7 +18,11 @@
 
 # Live Preview
 
-<video src="./frontend/public/implement2.mp4" controls autoplay muted loop width="100%"></video>
+<div align="center">
+  <video src="https://raw.githubusercontent.com/leapwithluvi/nexus-neural-orchestrator/main/frontend/public/implement1.mp4" autoplay loop muted playsinline controls width="90%"></video>
+  <br/><br/>
+  <video src="https://raw.githubusercontent.com/leapwithluvi/nexus-neural-orchestrator/main/frontend/public/implement2.mp4" autoplay loop muted playsinline controls width="90%"></video>
+</div>
 
 **[Visit Nexus AI Live → nexusai.my.id](https://www.nexusai.my.id)**
 

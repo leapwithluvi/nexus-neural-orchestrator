@@ -77,8 +77,8 @@ export const ChatInput = ({ onSend }: { onSend: (message: string) => Promise<voi
               type="submit"
               disabled={!value.trim() || isSubmitting}
               className={cn(
-                "h-10 w-10 rounded-xl bg-primary text-primary-foreground",
-                "hover:bg-primary/90 active:scale-[0.98] transition-all",
+                "h-10 w-10 rounded-xl bg-emerald-500 text-white",
+                "hover:bg-emerald-600 active:scale-[0.98] transition-all",
                 "disabled:opacity-40 disabled:cursor-not-allowed"
               )}
               aria-label="Send message"

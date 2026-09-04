@@ -24,6 +24,6 @@ export const pricingTiers = [
         cta: "Liaison Office",
         subtext: "Commercial Deployment",
         href: "#contact",
-        disabled: false
+        disabled: true
     }
 ];

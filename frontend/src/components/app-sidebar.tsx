@@ -227,12 +227,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuItem>
                 <SidebarMenuButton onClick={context?.signOut} size="default" className="gap-3 rounded-xl px-3 py-2.5 font-medium justify-start text-destructive hover:text-destructive hover:bg-destructive/10">
                   <LogOut className="w-5 h-5" />
-                  <span className="truncate">Disconnect Protocol</span>
+                  <span className="truncate">Sign Out</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ) : (
               <SidebarMenuItem>
-                <SidebarMenuButton asChild size="default" className="gap-3 rounded-xl px-3 py-2.5 font-medium justify-start text-primary hover:bg-primary/10">
+                <SidebarMenuButton asChild size="default" className="gap-3 rounded-xl px-3 py-2.5 font-medium justify-start bg-emerald-500 text-white hover:bg-emerald-600 hover:text-white transition-colors">
                   <Link href="/login">
                     <User className="w-5 h-5" />
                     <span className="truncate">Sign In</span>
