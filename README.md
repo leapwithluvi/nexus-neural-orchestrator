@@ -18,9 +18,9 @@
 # Live Preview
 
 <div align="center">
-  <video src="https://raw.githubusercontent.com/leapwithluvi/nexus-neural-orchestrator/main/frontend/public/implement1.gif" autoplay loop muted playsinline controls width="90%"></video>
+  <img src="frontend/public/implement1.gif" width="100%" alt="Nexus AI Overview">
   <br/><br/>
-  <video src="https://raw.githubusercontent.com/leapwithluvi/nexus-neural-orchestrator/main/frontend/public/implement2.gif" autoplay loop muted playsinline controls width="90%"></video>
+  <img src="frontend/public/implement2.gif" width="100%" alt="Nexus AI Overview">
 </div>
 
 **[Visit Nexus AI Live → nexusai.my.id](https://www.nexusai.my.id)**
