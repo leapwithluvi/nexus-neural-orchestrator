@@ -15,15 +15,7 @@ const app = new Hono()
 // ==========================================
 
 import { csrf } from 'hono/csrf'
-import { bodyLimit } from 'hono/body-limit'
-
-// Payload Size Limit
-app.use(
-  bodyLimit({
-    maxSize: 5 * 1024 * 1024,
-    onError: (c) => c.json({ success: false, error: { code: 'PAYLOAD_TOO_LARGE', message: 'Request body is too large' } }, 413),
-  })
-)
+// Payload limit handled by Vercel directly
 
 // We remove the strict Hono CSRF middleware because modern Fetch/CORS 
 // with exact Origin matching securely handles cross-site isolation for APIs.
