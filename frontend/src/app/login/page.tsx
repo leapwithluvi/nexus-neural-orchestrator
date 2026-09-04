@@ -10,13 +10,17 @@ export default function LoginPage() {
 
   return (
     <div className="bg-background min-h-screen selection:bg-foreground selection:text-background font-sans relative">
-      <Link 
-        href="/" 
-        className="absolute top-8 left-8 p-2 text-muted-foreground hover:text-foreground transition-colors z-10"
-      >
-        <ArrowLeft size={24} />
-      </Link>
-      <main className="flex items-center justify-center min-h-screen py-20 px-4">
+      <main className="flex flex-col items-center justify-center min-h-screen py-20 px-4">
+        
+        <div className="w-full max-w-md mb-6 flex justify-start">
+          <Link 
+            href="/overview" 
+            className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft size={16} /> Returns
+          </Link>
+        </div>
+
         <div className="w-full max-w-md p-10 border-2 border-border bg-background shadow-[30px_30px_0px_0px_rgba(0,0,0,0.05)] relative overflow-hidden group">
           {/* Subtle Grid Pattern Overlay */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:20px_20px]"></div>

@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import Logo from "@/components/Logo";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface Message {
   id: string;
@@ -45,13 +46,6 @@ function ChatPageContent() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  // Redirect to overview if not authenticated
-  useEffect(() => {
-    if (!isAuthLoading && !user) {
-      router.push("/overview");
-    }
-  }, [isAuthLoading, user, router]);
-
   const currentChat = chats.find(c => c.id === currentChatId);
   const currentMessages = currentChatId ? messages[currentChatId] || [] : [];
 
@@ -64,6 +58,10 @@ function ChatPageContent() {
   }, [currentMessages]);
 
   const handleSend = async (message: string) => {
+    if (!user) {
+      router.push("/login");
+      return;
+    }
     if (!currentChatId) {
       const newChat = await createChat(message);
       setCurrentChat(newChat.id);
@@ -74,7 +72,7 @@ function ChatPageContent() {
     setIsLoading(false);
   };
 
-  if (isAuthLoading || !user) {
+  if (isAuthLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-background">
         <Logo size={60} className="animate-pulse opacity-50" />
@@ -175,6 +173,23 @@ function ChatPageContent() {
                 Ask questions, get analysis, write code, or just chat — I'm here
                 to help with whatever you need.
               </p>
+              
+              {!user && (
+                <div className="flex gap-4 items-center">
+                  <Link 
+                    href="/login" 
+                    className="px-6 py-2.5 bg-foreground text-background text-xs font-black uppercase tracking-widest shadow-md hover:opacity-90 transition-all"
+                  >
+                    Login to Chat
+                  </Link>
+                  <Link 
+                    href="/overview" 
+                    className="px-6 py-2.5 bg-muted text-foreground text-xs font-black uppercase tracking-widest hover:bg-muted/80 transition-all"
+                  >
+                    View Overview
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </div>
