@@ -15,6 +15,7 @@ import { useAppContext } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import Logo from "@/components/Logo";
+import { useRouter } from "next/navigation";
 
 interface Message {
   id: string;
@@ -42,6 +43,14 @@ function ChatPageContent() {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  // Redirect to overview if not authenticated
+  useEffect(() => {
+    if (!isAuthLoading && !user) {
+      router.push("/overview");
+    }
+  }, [isAuthLoading, user, router]);
 
   const currentChat = chats.find(c => c.id === currentChatId);
   const currentMessages = currentChatId ? messages[currentChatId] || [] : [];
@@ -64,6 +73,14 @@ function ChatPageContent() {
     await sendMessage(currentChatId, message);
     setIsLoading(false);
   };
+
+  if (isAuthLoading || !user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <Logo size={60} className="animate-pulse opacity-50" />
+      </div>
+    );
+  }
 
   const groupedMessages = currentMessages.reduce((groups, message, index) => {
     const date = new Date(message.timestamp).toDateString();
@@ -102,7 +119,7 @@ function ChatPageContent() {
             openMobile && "overflow-hidden",
           )}
         >
-          {isAuthLoading || isMessagesLoading ? (
+          {isMessagesLoading ? (
             <div className="flex flex-col gap-6 max-w-3xl mx-auto w-full px-4 h-full">
               {[1, 2, 3].map((i) => (
                 <div
