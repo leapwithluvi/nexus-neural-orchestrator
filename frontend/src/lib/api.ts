@@ -31,12 +31,22 @@ export const apiUrl = (path: string): string => {
  *  - Sends cookies (credentials: "include") for httpOnly session auth
  *  - Accepts an optional RequestInit to override/extend defaults
  */
-export const apiFetch = (path: string, init?: RequestInit): Promise<Response> => {
-  return fetch(apiUrl(path), {
+export const apiFetch = async (path: string, init?: RequestInit): Promise<Response> => {
+  const response = await fetch(apiUrl(path), {
     credentials: "include",
     ...init,
     headers: {
       ...(init?.headers ?? {}),
     },
   });
+
+  // Global Session Manager: Automatically redirect to login if session expires
+  if (response.status === 401 && typeof window !== "undefined") {
+    // Only redirect if we are not already on the login page or trying to fetch session
+    if (window.location.pathname !== "/login" && !path.includes("/auth/session") && !path.includes("/auth/logout")) {
+      window.location.href = `/login?login=error&reason=expired`;
+    }
+  }
+
+  return response;
 };

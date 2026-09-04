@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState, useCallback } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import { toast } from "sonner";
 
@@ -157,22 +157,32 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   const [theme, setTheme] = useState("light");
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
   const searchParams = useSearchParams();
+  const pathname = usePathname();
 
   // Add toast on login success/error
   useEffect(() => {
     const loginStatus = searchParams.get("login");
     if (loginStatus === "success") {
       toast.success("Successfully logged in!");
-      // Clean up URL
-      if (window.history.replaceState) {
-        const url = new URL(window.location.href);
-        url.searchParams.delete("login");
-        window.history.replaceState({}, "", url.toString());
-      }
+      // Clean up URL properly via Next.js router
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.delete("login");
+      router.replace(`${pathname}${newParams.toString() ? `?${newParams.toString()}` : ""}`);
     } else if (loginStatus === "error") {
-      toast.error("Failed to login. Please try again.");
+      const reason = searchParams.get("reason");
+      if (reason === "expired") {
+        toast.error("Session Expired", { description: "Your secure connection timed out. Please authenticate again." });
+      } else {
+        toast.error("Failed to login. Please try again.");
+      }
+      
+      const newParams = new URLSearchParams(searchParams.toString());
+      newParams.delete("error");
+      newParams.delete("login");
+      newParams.delete("reason");
+      router.replace(`${pathname}${newParams.toString() ? `?${newParams.toString()}` : ""}`);
     }
-  }, [searchParams]);
+  }, [searchParams, pathname, router]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light";
@@ -207,15 +217,6 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       setUser(null);
     } finally {
       setIsAuthLoading(false);
-      // Clean up URL if OAuth redirects left ?login=success or ?error=
-      if (typeof window !== "undefined") {
-        const url = new URL(window.location.href);
-        if (url.searchParams.has("login") || url.searchParams.has("error")) {
-          url.searchParams.delete("login");
-          url.searchParams.delete("error");
-          window.history.replaceState({}, "", url.toString());
-        }
-      }
     }
   };
 
@@ -490,11 +491,9 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     setCurrentChatId(newChat.id);
     setMessages(prev => ({ ...prev, [newChat.id]: [] }));
 
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      url.searchParams.set("c", newChat.id);
-      window.history.replaceState({}, "", url.toString());
-    }
+    const newParams = new URLSearchParams(searchParams.toString());
+    newParams.set("c", newChat.id);
+    router.push(`/?${newParams.toString()}`);
 
     if (initialMessage) {
       // Send the initial message and trigger AI stream
@@ -529,15 +528,15 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   const setCurrentChat = useCallback(async (id: string | null) => {
     setCurrentChatId(id);
     
-    if (typeof window !== "undefined") {
-      const url = new URL(window.location.href);
-      if (id) {
-        url.searchParams.set("c", id);
-      } else {
-        url.searchParams.delete("c");
-      }
-      window.history.replaceState({}, "", url.toString());
+    // Always navigate to root (/) while keeping other search params like login=success
+    const newParams = new URLSearchParams(searchParams.toString());
+    if (id) {
+      newParams.set("c", id);
+    } else {
+      newParams.delete("c");
     }
+    const query = newParams.toString() ? `?${newParams.toString()}` : "";
+    router.push(`/${query}`);
 
     if (id) {
       const chat = chats.find(c => c.id === id);

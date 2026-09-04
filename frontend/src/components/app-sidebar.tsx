@@ -44,7 +44,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const user = context?.user;
   const chats = context?.chats ?? [];
   const currentChatId = context?.currentChatId;
-  const { state, toggleSidebar } = useSidebar();
+  const { state, toggleSidebar, setOpenMobile } = useSidebar();
   const [search, setSearch] = React.useState("");
 
   const groupedChats = chats.reduce((acc, chat) => {
@@ -72,10 +72,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     context?.setCurrentChat(id);
   };
 
-  const handleNewChat = async () => {
-    const newChat = await context?.createChat("");
-    if (newChat) {
-      context?.setCurrentChat(newChat.id);
+  const handleNewChat = () => {
+    context?.setCurrentChat(null);
+    if (setOpenMobile) {
+      setOpenMobile(false);
     }
   };
 
@@ -225,15 +225,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuItem>
             ) : user ? (
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  size="default"
-                  className="gap-3 rounded-xl px-3 py-2.5 font-medium justify-start text-destructive hover:bg-destructive/10 cursor-pointer"
-                >
-                  <button onClick={() => context?.signOut?.()}>
-                    <LogOut className="w-5 h-5" />
-                    <span className="truncate">Sign Out</span>
-                  </button>
+                <SidebarMenuButton onClick={context?.signOut} size="default" className="gap-3 rounded-xl px-3 py-2.5 font-medium justify-start text-destructive hover:text-destructive hover:bg-destructive/10">
+                  <LogOut className="w-5 h-5" />
+                  <span className="truncate">Disconnect Protocol</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             ) : (
