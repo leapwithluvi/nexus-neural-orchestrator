@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -9,21 +8,11 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { LoginForm } from "./LoginForm";
-import { RegisterForm } from "./RegisterForm";
 import { cn } from "@/lib/utils";
 
-interface AuthDialogProps {
-  children: React.ReactNode;
-  defaultMode?: "login" | "register";
-}
-
-export function AuthDialog({ children, defaultMode = "login" }: AuthDialogProps) {
-  const [mode, setMode] = useState<"login" | "register">(defaultMode);
-
+export function AuthDialog({ children }: { children: React.ReactNode }) {
   return (
-    <Dialog onOpenChange={(open) => {
-        if (!open) setTimeout(() => setMode(defaultMode), 300);
-    }}>
+    <Dialog>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
@@ -44,11 +33,7 @@ export function AuthDialog({ children, defaultMode = "login" }: AuthDialogProps)
             <div className="absolute top-0 left-0 w-1 h-full bg-foreground opacity-10"></div>
             
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150 fill-mode-both">
-                {mode === "login" ? (
-                <LoginForm onSwitch={() => setMode("register")} />
-                ) : (
-                <RegisterForm onSwitch={() => setMode("login")} />
-                )}
+              <LoginForm />
             </div>
 
             {/* Decorative Matrix Code bits */}

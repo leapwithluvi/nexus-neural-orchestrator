@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { apiUrl } from "@/lib/api";
 
-export function LoginForm({ onSwitch }: { onSwitch?: () => void }) {
+export function LoginForm() {
   const [loading, setLoading] = useState<string | null>(null);
 
   const handleOAuthClick = (provider: "google" | "github") => {
