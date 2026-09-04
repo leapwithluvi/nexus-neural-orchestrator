@@ -1,7 +1,7 @@
 export const pricingTiers = [
     {
         name: "Public Access",
-        metrics: ["Free Entry", "Message Limits", "Gemma 4.0 Core", "Shared Instance"],
+        metrics: ["Free Entry", "Message Limits", "Groq Core", "Shared Instance"],
         pricing: "FREE*",
         cta: "Connect System",
         subtext: "*Limited Alpha Access",
