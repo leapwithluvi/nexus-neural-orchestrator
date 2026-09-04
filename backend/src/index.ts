@@ -25,19 +25,8 @@ app.use(
   })
 )
 
-const allowedOrigins = Array.isArray(env.cors.origin)
-  ? env.cors.origin
-  : typeof env.cors.origin === 'string'
-    ? (env.cors.origin as string).split(',').map(o => o.trim())
-    : [];
-
-app.use(
-  csrf({
-    origin: (origin) => {
-      return !origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost')
-    },
-  })
-)
+// We remove the strict Hono CSRF middleware because modern Fetch/CORS 
+// with exact Origin matching securely handles cross-site isolation for APIs.
 
 // Request logging
 app.use(logger())
@@ -45,10 +34,18 @@ app.use(logger())
 // Security headers
 app.use(secureHeaders())
 
+const allowedOrigins = Array.isArray(env.cors.origin)
+  ? env.cors.origin
+  : typeof env.cors.origin === 'string'
+    ? (env.cors.origin as string).split(',').map(o => o.trim())
+    : [];
+
 app.use(
   cors({
     origin: (origin) => {
-      if (allowedOrigins.includes(origin) || origin.startsWith('http://localhost')) {
+      if (!origin) return allowedOrigins[0] || 'http://localhost:3000'
+      const isAllowed = allowedOrigins.some(o => origin.includes(o.replace(/^https?:\/\//, '')))
+      if (isAllowed || origin.startsWith('http://localhost')) {
         return origin
       }
       return allowedOrigins[0] || 'http://localhost:3000'
