@@ -25,7 +25,7 @@ export default function LoginPage() {
           {/* Subtle Grid Pattern Overlay */}
           <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:20px_20px]"></div>
           
-          <LoginForm onSwitch={() => router.push("/register")} />
+          <LoginForm />
           
           <div className="mt-8 pt-8 border-t border-border flex justify-between items-center opacity-30">
               <span className="text-[8px] font-black tracking-widest uppercase">NXS SECURE AUTH</span>
