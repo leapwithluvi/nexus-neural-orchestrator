@@ -1,4 +1,4 @@
-# Nexus Neural Orchestrator — Fullstack AI Chatbot
+# Nexus Neural Orchestrator
 
 <!-- GitHub badges -->
 [![Stars](https://img.shields.io/github/stars/leapwithluvi/nexus-neural-orchestrator?style=social)](https://github.com/leapwithluvi/nexus-neural-orchestrator/stargazers)
@@ -31,18 +31,18 @@
 
 <details><summary>Click to expand</summary>
 
-- [About The Project](#-about-the-project)
-- [Key Features Highlights](#-key-features-highlights)
-- [Comprehensive Features](#-comprehensive-features)
-- [Technologies Used](#-technologies-used)
-- [Architecture & Layout](#-architecture--layout)
-- [Get Started (Setup & DB)](#-get-started--local-development)
-- [How to Use](#-how-to-use-guide)
-- [API Reference](#-api-reference)
-- [Security Recommendations](#-security-recommendations)
-- [Featured Projects](#-featured-projects)
-- [Contact](#-contact)
-- [License](#-license)
+- [About The Project](#about-the-project)
+- [Key Features Highlights](#key-features-highlights)
+- [Comprehensive Features](#comprehensive-features)
+- [Technologies Used](#technologies-used)
+- [Architecture & Layout](#architecture--layout)
+- [Get Started (Setup & DB)](#get-started-setup-db)
+- [How to Use](#how-to-use-guide)
+- [API Reference](#api-reference)
+- [Security Recommendations](#security-recommendations)
+- [Featured Projects](#featured-projects)
+- [Contact](#contact)
+- [License](#license)
 
 </details>
 
