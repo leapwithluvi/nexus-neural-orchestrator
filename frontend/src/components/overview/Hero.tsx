@@ -26,8 +26,8 @@ const Hero = () => {
                     Our platform provides high-integrity artificial intelligence for critical operations. 
                     Built on secure architecture and validated models.
                 </p>
-                <Link href="/" className="inline-block text-xs uppercase tracking-[0.2em] font-bold border-b-2 border-foreground pb-1 hover:opacity-70 transition-all cursor-pointer mt-4">
-                    {user ? "Open Terminal" : "Start For Free"}
+                <Link href="/" className="inline-block px-6 py-3 bg-foreground text-background text-[10px] font-black uppercase tracking-widest hover:opacity-90 transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,0.1)] active:translate-y-[2px] active:shadow-none mt-4">
+                    {user ? "Open Terminal" : "Explore Chat"}
                 </Link>
             </div>
         </div>

@@ -159,30 +159,33 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   const searchParams = useSearchParams();
   const pathname = usePathname();
 
-  // Add toast on login success/error
+  // Add toast on login success/error — clean URL IMMEDIATELY via synchronous history API
   useEffect(() => {
-    const loginStatus = searchParams.get("login");
+    if (typeof window === "undefined") return;
+    const urlParams = new URLSearchParams(window.location.search);
+    const loginStatus = urlParams.get("login");
     if (loginStatus === "success") {
+      // Strip login param from URL synchronously BEFORE showing toast
+      urlParams.delete("login");
+      const cleanUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ""}`;
+      window.history.replaceState({}, "", cleanUrl);
       toast.success("Successfully logged in!");
-      // Clean up URL properly via Next.js router
-      const newParams = new URLSearchParams(searchParams.toString());
-      newParams.delete("login");
-      router.replace(`${pathname}${newParams.toString() ? `?${newParams.toString()}` : ""}`);
     } else if (loginStatus === "error") {
-      const reason = searchParams.get("reason");
+      const reason = urlParams.get("reason");
+      // Strip all auth params synchronously
+      urlParams.delete("error");
+      urlParams.delete("login");
+      urlParams.delete("reason");
+      const cleanUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ""}`;
+      window.history.replaceState({}, "", cleanUrl);
       if (reason === "expired") {
         toast.error("Session Expired", { description: "Your secure connection timed out. Please authenticate again." });
       } else {
         toast.error("Failed to login. Please try again.");
       }
-      
-      const newParams = new URLSearchParams(searchParams.toString());
-      newParams.delete("error");
-      newParams.delete("login");
-      newParams.delete("reason");
-      router.replace(`${pathname}${newParams.toString() ? `?${newParams.toString()}` : ""}`);
     }
-  }, [searchParams, pathname, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light";
@@ -241,49 +244,46 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
 
       setChats(mappedChats);
       
-      let targetChatId = mappedChats.length > 0 ? mappedChats[0].id : null;
-      
+      // Only restore a specific chat if the URL explicitly has ?c=<id>
+      // Otherwise, always land on fresh "New Chat" state
       if (typeof window !== "undefined") {
         const params = new URLSearchParams(window.location.search);
         const urlChatId = params.get("c");
         if (urlChatId && mappedChats.some(c => c.id === urlChatId)) {
-          targetChatId = urlChatId;
-        }
-      }
-
-      if (targetChatId) {
-        const chat = mappedChats.find(c => c.id === targetChatId);
-        setSelectedChat(chat || null);
-        setCurrentChatId(targetChatId);
-        
-        // Ensure its historical messages are loaded immediately on mount
-        try {
-          const mRes = await apiFetch(`/api/v1/conversations/${targetChatId}`);
-          if (mRes.ok) {
-            const data = await mRes.json();
-            if (data.data && data.data.messages) {
-              const historicalMessages: Message[] = data.data.messages.map((m: any) => ({
-                id: m.id,
-                role: m.role,
-                content: m.content,
-                timestamp: m.createdAt,
-                telemetry: m.role === 'assistant' && (m.tokenCount || m.latency) ? {
-                  totalTokens: m.tokenCount || 0,
-                  promptTokens: 0,
-                  completionTokens: m.tokenCount || 0,
-                  totalTime: m.latency || 0,
-                  promptTime: 0,
-                  completionTime: m.latency || 0,
-                  speed: (m.latency && m.tokenCount) ? Math.round(m.tokenCount / m.latency) : 0,
-                  model: m.model || undefined
-                } : undefined
-              }));
-              setMessages(prev => ({ ...prev, [targetChatId]: historicalMessages }));
+          const chat = mappedChats.find(c => c.id === urlChatId);
+          setSelectedChat(chat || null);
+          setCurrentChatId(urlChatId);
+          
+          // Ensure its historical messages are loaded immediately on mount
+          try {
+            const mRes = await apiFetch(`/api/v1/conversations/${urlChatId}`);
+            if (mRes.ok) {
+              const data = await mRes.json();
+              if (data.data && data.data.messages) {
+                const historicalMessages: Message[] = data.data.messages.map((m: any) => ({
+                  id: m.id,
+                  role: m.role,
+                  content: m.content,
+                  timestamp: m.createdAt,
+                  telemetry: m.role === 'assistant' && (m.tokenCount || m.latency) ? {
+                    totalTokens: m.tokenCount || 0,
+                    promptTokens: 0,
+                    completionTokens: m.tokenCount || 0,
+                    totalTime: m.latency || 0,
+                    promptTime: 0,
+                    completionTime: m.latency || 0,
+                    speed: (m.latency && m.tokenCount) ? Math.round(m.tokenCount / m.latency) : 0,
+                    model: m.model || undefined
+                  } : undefined
+                }));
+                setMessages(prev => ({ ...prev, [urlChatId]: historicalMessages }));
+              }
             }
+          } catch (e) {
+            console.error("Failed to fetch initial historical messages", e);
           }
-        } catch (e) {
-          console.error("Failed to fetch initial historical messages", e);
         }
+        // If no ?c= param, user lands on fresh "New Chat" (no auto-select)
       }
     } catch (e) {
       console.warn("[AppContext] Failed to fetch conversations, using empty state:", e);
@@ -505,12 +505,18 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
     setCurrentChatId(newChat.id);
     setMessages(prev => ({ ...prev, [newChat.id]: [] }));
 
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.delete("login");
-    newParams.delete("error");
-    newParams.delete("reason");
-    newParams.set("c", newChat.id);
-    router.push(`/?${newParams.toString()}`);
+    // Build fresh params from browser URL (not stale Next.js state)
+    const freshParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+    freshParams.delete("login");
+    freshParams.delete("error");
+    freshParams.delete("reason");
+    freshParams.set("c", newChat.id);
+    const newUrl = `/?${freshParams.toString()}`;
+    // Immediately sync URL in same tick
+    if (typeof window !== "undefined") {
+      window.history.replaceState({}, "", newUrl);
+    }
+    router.replace(newUrl);
 
     if (initialMessage) {
       // Send the initial message and trigger AI stream
@@ -545,19 +551,24 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
   const setCurrentChat = useCallback(async (id: string | null) => {
     setCurrentChatId(id);
     
-    // Always navigate to root (/) while avoiding stale Next.js cached auth params
-    const newParams = new URLSearchParams(searchParams.toString());
-    newParams.delete("login");
-    newParams.delete("error");
-    newParams.delete("reason");
+    // Build fresh params from the actual browser URL (not stale Next.js state)
+    const freshParams = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+    freshParams.delete("login");
+    freshParams.delete("error");
+    freshParams.delete("reason");
     
     if (id) {
-      newParams.set("c", id);
+      freshParams.set("c", id);
     } else {
-      newParams.delete("c");
+      freshParams.delete("c");
     }
-    const query = newParams.toString() ? `?${newParams.toString()}` : "";
-    router.push(`/${query}`);
+    const query = freshParams.toString() ? `?${freshParams.toString()}` : "";
+    const newUrl = `/${query}`;
+    // Immediately sync URL in same tick
+    if (typeof window !== "undefined") {
+      window.history.replaceState({}, "", newUrl);
+    }
+    router.replace(newUrl);
 
     if (id) {
       const chat = chats.find(c => c.id === id);

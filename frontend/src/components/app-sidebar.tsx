@@ -17,7 +17,16 @@ import {
 import { NavChats } from "@/components/nav-chats";
 import { NavUser } from "@/components/nav-user";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { apiFetch } from "@/lib/api";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
   Sidebar,
   SidebarContent,
@@ -46,6 +55,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const currentChatId = context?.currentChatId;
   const { state, toggleSidebar, setOpenMobile } = useSidebar();
   const [search, setSearch] = React.useState("");
+  const [showLogoutDialog, setShowLogoutDialog] = React.useState(false);
 
   const groupedChats = chats.reduce((acc, chat) => {
     const date = new Date(chat.updatedAt);
@@ -225,7 +235,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuItem>
             ) : user ? (
               <SidebarMenuItem>
-                <SidebarMenuButton onClick={context?.signOut} size="default" className="gap-3 rounded-xl px-3 py-2.5 font-medium justify-start text-destructive hover:text-destructive hover:bg-destructive/10">
+                <SidebarMenuButton onClick={() => setShowLogoutDialog(true)} size="default" className="gap-3 rounded-xl px-3 py-2.5 font-medium justify-start text-destructive hover:text-destructive hover:bg-destructive/10">
                   <LogOut className="w-5 h-5" />
                   <span className="truncate">Sign Out</span>
                 </SidebarMenuButton>
@@ -256,5 +266,50 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         )}
       </SidebarFooter>
     </Sidebar>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+        <DialogContent className="sm:max-w-md rounded-none border-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 font-black uppercase tracking-widest text-destructive">
+              <LogOut size={18} />
+              Confirm Sign Out
+            </DialogTitle>
+            <DialogDescription className="text-[10px] font-bold uppercase tracking-wider opacity-70">
+              Session Termination Protocol
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-4">
+            <div className="flex flex-col gap-3 font-mono text-[11px] text-muted-foreground bg-muted/30 p-4 border border-border/50">
+              <p className="leading-relaxed">
+                Are you sure you want to sign out? Your conversation history will be preserved, but you will need to re-authenticate to access your chats.
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="flex gap-2 sm:gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowLogoutDialog(false)}
+              className="rounded-none font-black uppercase tracking-widest text-[10px]"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={() => {
+                setShowLogoutDialog(false);
+                context?.signOut();
+              }}
+              className="rounded-none font-black uppercase tracking-widest text-[10px] bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Confirm Sign Out
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

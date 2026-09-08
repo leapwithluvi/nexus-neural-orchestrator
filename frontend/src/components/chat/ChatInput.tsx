@@ -22,12 +22,18 @@ export const ChatInput = ({ onSend }: { onSend: (message: string) => Promise<voi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (value.trim() && !isSubmitting) {
+    const trimmed = value.trim();
+    if (trimmed && !isSubmitting) {
+      // Clear input immediately for instant UX feedback
+      const previousValue = value;
+      setValue("");
+      setHeight(48);
       setIsSubmitting(true);
       try {
-        await onSend(value.trim());
-        setValue("");
-        setHeight(48);
+        await onSend(trimmed);
+      } catch {
+        // Restore value if send fails so user can retry
+        setValue(previousValue);
       } finally {
         setIsSubmitting(false);
       }
