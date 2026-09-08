@@ -112,8 +112,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   };
 
   return (
-    <Sidebar variant="sidebar" className="border-r border-border bg-background" {...props}>
-      <SidebarHeader className="border-b border-border p-4">
+    <>
+      <Sidebar variant="sidebar" className="border-r border-border bg-background" {...props}>
+        <SidebarHeader className="border-b border-border p-4">
         <SidebarMenuButton asChild size="lg" className="hover:bg-transparent p-0 w-full justify-start">
           <Link href="/overview" className="flex items-center gap-3 w-full">
             <Logo size={28} />
