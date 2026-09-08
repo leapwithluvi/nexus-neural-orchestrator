@@ -169,6 +169,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       urlParams.delete("login");
       const cleanUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ""}`;
       window.history.replaceState({}, "", cleanUrl);
+      router.replace(cleanUrl, { scroll: false });
       toast.success("Successfully logged in!");
     } else if (loginStatus === "error") {
       const reason = urlParams.get("reason");
@@ -178,6 +179,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       urlParams.delete("reason");
       const cleanUrl = `${window.location.pathname}${urlParams.toString() ? `?${urlParams.toString()}` : ""}`;
       window.history.replaceState({}, "", cleanUrl);
+      router.replace(cleanUrl, { scroll: false });
       if (reason === "expired") {
         toast.error("Session Expired", { description: "Your secure connection timed out. Please authenticate again." });
       } else {
@@ -185,7 +187,7 @@ export const AppContextProvider = ({ children }: { children: React.ReactNode }) 
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme") || "light";
